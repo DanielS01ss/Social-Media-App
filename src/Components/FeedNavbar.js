@@ -116,6 +116,7 @@ export default function PrimarySearchAppBar() {
    setMobileMoreAnchorEl(event.currentTarget);
  };
 
+
  const menuId = 'primary-search-account-menu';
  const renderMenu = (
    <Menu
@@ -173,7 +174,7 @@ export default function PrimarySearchAppBar() {
      </MenuItem>
    </Menu>
  );
- 
+
 
   const [open, setOpen] = useState(false);
 
@@ -186,9 +187,17 @@ export default function PrimarySearchAppBar() {
       setOpen(false);
   }
 
+  const [renderHamMenu,setRenderHamMenu] = useState(true);
+
+
   useEffect(()=>{
     window.addEventListener("resize",handleDrawerAtResize);
-
+    if(window.location.pathname == "/user/profile")
+    {
+      setRenderHamMenu(false);
+    } else {
+      setRenderHamMenu(true);
+    }
     return ()=>{
       window.removeEventListener("resize",handleDrawerAtResize);
     }
@@ -207,16 +216,16 @@ export default function PrimarySearchAppBar() {
       }}>
        <Toolbar>
        {/* This is the drawer button */}
+   {renderHamMenu && <IconButton
+      edge="start"
+      className={`${classes.menuButton} sidebar`}
+      color="inherit"
+      aria-label="open drawer"
+      onClick ={toggleDrawer}
+    >
+      <MenuIcon />
+    </IconButton> }
 
-        <IconButton
-           edge="start"
-           className={`${classes.menuButton} sidebar`}
-           color="inherit"
-           aria-label="open drawer"
-           onClick ={toggleDrawer}
-         >
-           <MenuIcon />
-         </IconButton>
 
 
       {/* This is the drawer button */}
@@ -236,6 +245,7 @@ export default function PrimarySearchAppBar() {
              inputProps={{ 'aria-label': 'search' }}
            />
          </div>
+         <p>HomePage</p>
          <div className={classes.grow} />
          <div className={classes.sectionDesktop}>
            <IconButton aria-label="show 4 new mails" color="inherit">
