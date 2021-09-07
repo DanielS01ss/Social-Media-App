@@ -46,6 +46,15 @@
   display: none;
 }
 
+.home-page-link{
+    color:#fff;
+    font-size: 1.3rem;
+}
+
+.home-icon{
+  margin-right: 5px;
+}
+
 @media only screen and (max-width:650px)
 {
     .icon-container{

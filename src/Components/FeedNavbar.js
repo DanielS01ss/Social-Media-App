@@ -26,6 +26,7 @@ import {faQuestionCircle} from '@fortawesome/free-solid-svg-icons';
 import {faBuilding} from '@fortawesome/free-solid-svg-icons';
 import {faCalendar} from '@fortawesome/free-solid-svg-icons';
 import {faGraduationCap} from '@fortawesome/free-solid-svg-icons';
+import {faHome} from '@fortawesome/free-solid-svg-icons';
 
 const useStyles = makeStyles((theme) => ({
  grow: {
@@ -245,7 +246,10 @@ export default function PrimarySearchAppBar() {
              inputProps={{ 'aria-label': 'search' }}
            />
          </div>
-         <p>HomePage</p>
+         <FontAwesomeIcon icon = {faHome} className="home-icon"/>
+         <p className="home-page-link">
+         Home
+         </p>
          <div className={classes.grow} />
          <div className={classes.sectionDesktop}>
            <IconButton aria-label="show 4 new mails" color="inherit">
