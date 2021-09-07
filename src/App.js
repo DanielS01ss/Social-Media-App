@@ -24,9 +24,10 @@ const App = ()=>{
      </Route>
        <Route  path='/user'>
         <FeedNavbar/>
+           <Route exact path="/user/profile" component={Profile}/>
         <Route  path='/user/feed' component={MainPage}/>
        </Route>
-       <Route path="/user/profile" component={Profile}/>
+
 
       <Route exact path='/login' component={Login} >
       </Route>

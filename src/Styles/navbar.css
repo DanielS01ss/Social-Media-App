@@ -40,6 +40,11 @@
   font-size: 1.3rem;
 }
 
+.linkStyle:hover{
+  font-size: 1.6rem;
+  color:#fff;
+}
+
 .mainLogo{
   font-size:1.9em;
   margin-left:1%;
