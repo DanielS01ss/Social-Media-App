@@ -61,7 +61,9 @@
   border-radius: 50%;
 }
 
-.notifications-dropdown{
+.navbar-dropdown{
+  display: flex;
+  flex-direction: column;
   width: 40%;
   background-color: #fff;
   border:1px solid #dedede;
@@ -69,16 +71,112 @@
   position: fixed;
   right: 10px;
   top:64px;
-  border-radius: 5px;
+  border-radius: 10px;
   padding:10px;
   -webkit-box-shadow: 0px 0px 16px 0px rgba(0,0,0,0.73);
   box-shadow: 0px 0px 16px 0px rgba(0,0,0,0.73);
 }
 
-.notifications-title{
+.notification-item{
+  position: relative;
+  margin-top:5px;
+  display: inline;
+  margin-left:20px;
+}
+
+.navbar-dropdown-title{
   text-align: center;
   font-size: 1.3rem;
   border-bottom: 1px solid #dedede;
+}
+
+.notification-icon{
+  position: relative;
+  font-size: 1.1rem;
+  margin-top:20px;
+  margin-left:20px;
+}
+
+.notifications-photo{
+  /* position: relative; */
+  position: absolute;
+  top:13px;
+  left:-15px;
+  margin-right: 10px;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+}
+
+.notification-text{
+  font-size: 1.3rem;
+}
+
+.notification-birtday-icon{
+  width: 20px;
+  margin-left:20px;
+  margin-top:15px;
+}
+
+.notification-like{
+  color:blue;
+}
+
+.notification-comment{
+  color:green;
+}
+
+.notification-follow{
+  color:#cc9900;
+}
+
+.notifications-bottom-dialog{
+   padding-top:20px;
+   display:flex;
+   flex-direction: row;
+   justify-content: space-around;
+}
+
+.close-dialog-text{
+  /* margin-top:10px; */
+  color:blue;
+}
+
+.close-dialog-text:hover{
+   cursor: pointer;
+}
+
+.notifications-delete-text{
+  color:red;
+}
+
+.notifications-delete-icon{
+  margin-left:10px;
+}
+
+.no-notifications{
+  text-align: center;
+}
+
+.notifications-body{
+  display: flex;
+  flex-direction: column;
+}
+
+.no-message-icon{
+  margin-left: 45%;
+  font-size: 2.9rem;
+  color:#c3c1c1;
+}
+
+.no-messages-text{
+  text-align: center;
+}
+
+@media only screen and (max-width:1100px){
+    .navbar-dropdown{
+      width: 60%;
+    }
 }
 
 @media only screen and (max-width:650px)
@@ -92,6 +190,9 @@
 {
   .hidden-menu{
     width: 45%;
+  }
+  .navbar-dropdown{
+    width: 90%;
   }
 }
 
