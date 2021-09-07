@@ -44,7 +44,7 @@ const Profile = () =>{
           <div className="user-contact">
             <p className="user-contact-action">
             <FontAwesomeIcon icon = {faUserPlus} className = "user-action-icon"/>
-            <span className="user-action-icon-label">Add User</span>
+            <span className="user-action-icon-label">Follow</span>
             </p>
             <p className="user-contact-action">
             <FontAwesomeIcon icon = {faCommentAlt} className = "user-action-icon"/>

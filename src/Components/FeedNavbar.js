@@ -27,7 +27,13 @@ import {faBuilding} from '@fortawesome/free-solid-svg-icons';
 import {faCalendar} from '@fortawesome/free-solid-svg-icons';
 import {faGraduationCap} from '@fortawesome/free-solid-svg-icons';
 import {faHome} from '@fortawesome/free-solid-svg-icons';
+import {faGift} from '@fortawesome/free-solid-svg-icons';
+import {faThumbsUp} from '@fortawesome/free-solid-svg-icons';
+import {faComments} from '@fortawesome/free-solid-svg-icons';
+import {faPlusSquare} from '@fortawesome/free-solid-svg-icons';
+import {faTrash} from '@fortawesome/free-solid-svg-icons';
 import Person from "../images/person.jpg";
+import Birthday from '../images/gift-box.png';
 
 const useStyles = makeStyles((theme) => ({
  grow: {
@@ -119,15 +125,22 @@ export default function PrimarySearchAppBar() {
    setMobileMoreAnchorEl(event.currentTarget);
  };
 
- const handleNotificationsOpen = ()=>{
-    console.log("Was I clicked?!")
+ const handleNotificationsMenu = ()=>{
     ///for mobile menu we have : handleMobileMenuClose -<< it is the actual function name
     ///under 960px we have the menu for mobile rendered
     if(window.innerWidth<960)
     {
       handleMobileMenuClose();
     }
+    setRenderNotifications(!renderNotifications);
+ }
 
+ const handleMessagesMenu = ()=>{
+   if(window.innerWidth<960)
+   {
+     handleMobileMenuClose();
+   }
+   setRenderMessages(!renderMessages);
  }
 
  const menuId = 'primary-search-account-menu';
@@ -158,7 +171,7 @@ export default function PrimarySearchAppBar() {
      open={isMobileMenuOpen}
      onClose={handleMobileMenuClose}
    >
-     <MenuItem>
+     <MenuItem onClick={handleMessagesMenu}>
        <IconButton aria-label="show 4 new mails" color="inherit">
          <Badge badgeContent={4} color="secondary">
            <MailIcon />
@@ -166,7 +179,7 @@ export default function PrimarySearchAppBar() {
        </IconButton>
        <p>Messages</p>
      </MenuItem>
-     <MenuItem onClick={handleNotificationsOpen}>
+     <MenuItem onClick={handleNotificationsMenu}>
        <IconButton aria-label="show 11 new notifications"  color="inherit">
          <Badge badgeContent={11} color="secondary">
            <NotificationsIcon />
@@ -200,8 +213,11 @@ export default function PrimarySearchAppBar() {
       setOpen(false);
   }
 
-  const [renderHamMenu,setRenderHamMenu] = useState(true);
 
+  const notifications = [];
+  const [renderHamMenu,setRenderHamMenu] = useState(true);
+  const [renderNotifications, setRenderNotifications] = useState(false);
+  const [renderMessages,setRenderMessages] = useState(false);
 
   useEffect(()=>{
     window.addEventListener("resize",handleDrawerAtResize);
@@ -264,12 +280,12 @@ export default function PrimarySearchAppBar() {
          </p>
          <div className={classes.grow} />
          <div className={classes.sectionDesktop}>
-           <IconButton aria-label="show 4 new mails" color="inherit">
+           <IconButton aria-label="show 4 new mails" color="inherit" onClick={handleMessagesMenu}>
              <Badge badgeContent={1} color="secondary">
                <MailIcon />
              </Badge>
            </IconButton>
-           <IconButton aria-label="show 17 new notifications" onClick={handleNotificationsOpen} color="inherit">
+           <IconButton aria-label="show 17 new notifications" onClick={handleNotificationsMenu} color="inherit">
              <Badge badgeContent={17} color="secondary">
                <NotificationsIcon />
              </Badge>
@@ -300,16 +316,37 @@ export default function PrimarySearchAppBar() {
      </AppBar>
      {renderMobileMenu}
      {renderMenu}
-     <div className="notifications-dropdown">
-     {/*deci avem urmatoarele tipuri de notificari
-        1 ziua cuiva
-        2 like la o postare
-        3 comentariu la o postare
-        4 cerere de prietenie
-       */}
-       <p className="notifications-title">Notitifications</p>
-       <p> X is celebrating his/her birthday!</p>
-     </div>
+
+    {
+      renderNotifications &&
+      <div className="navbar-dropdown">
+
+       <p className="navbar-dropdown-title">Notitifications</p>
+        { notifications.length === 0 ? <p className="no-notifications">No new notifications</p> :
+        <div className="notifications-body">
+          <div className="notification-item"><img className="notifications-photo" src={Person}/> <img src={Birthday} className="notification-birtday-icon"/> <span className="notification-text"> X is celebrating his/her birthday</span></div>
+          <div className="notification-item"><img className="notifications-photo" src={Person}/> <FontAwesomeIcon icon={faThumbsUp} className="notification-icon notification-like"/> <span className="notification-text"> Liked your post</span></div>
+          <div className="notification-item"><img className="notifications-photo" src={Person}/> <FontAwesomeIcon icon={faComments} className="notification-icon notification-comment"/> <span className="notification-text"> Commented at your post</span></div>
+          <div className="notification-item"><img className="notifications-photo" src={Person}/> <FontAwesomeIcon icon={faPlusSquare} className="notification-icon notification-follow"/> <span className="notification-text"> Started to follow you</span></div>
+        </div>
+        }
+        <div className="notifications-bottom-dialog"><p className="close-dialog-text" onClick={handleNotificationsMenu}>Close notifications</p> {notifications.length>0 && <p className="notifications-delete-text">Delete all notifications <FontAwesomeIcon icon={faTrash} className="notifications-delete-icon"/></p>}</div>
+
+    </div>
+    }
+
+    {renderMessages &&
+      <div className="navbar-dropdown">
+          <p className="navbar-dropdown-title">Messages</p>
+            <FontAwesomeIcon icon ={faUserFriends} className="no-message-icon"/>
+           <p className="no-messages-text">No messages. Go and socialize with friends</p>
+           <div className="notifications-bottom-dialog"><p className="close-dialog-text" onClick={handleMessagesMenu}>Close notifications</p></div>
+      </div>
+    }
+
+
+
+
      <div className={open? "hidden-menu ": "hidden-menu hidden"}>
         <FontAwesomeIcon icon={faTimes} className="close-btn" onClick={toggleDrawer}/>
         <div className="item-container">
