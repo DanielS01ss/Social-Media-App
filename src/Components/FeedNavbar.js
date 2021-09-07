@@ -27,6 +27,7 @@ import {faBuilding} from '@fortawesome/free-solid-svg-icons';
 import {faCalendar} from '@fortawesome/free-solid-svg-icons';
 import {faGraduationCap} from '@fortawesome/free-solid-svg-icons';
 import {faHome} from '@fortawesome/free-solid-svg-icons';
+import Person from "../images/person.jpg";
 
 const useStyles = makeStyles((theme) => ({
  grow: {
@@ -102,6 +103,7 @@ export default function PrimarySearchAppBar() {
 
  const handleProfileMenuOpen = (event) => {
    setAnchorEl(event.currentTarget);
+
  };
 
  const handleMobileMenuClose = () => {
@@ -117,6 +119,16 @@ export default function PrimarySearchAppBar() {
    setMobileMoreAnchorEl(event.currentTarget);
  };
 
+ const handleNotificationsOpen = ()=>{
+    console.log("Was I clicked?!")
+    ///for mobile menu we have : handleMobileMenuClose -<< it is the actual function name
+    ///under 960px we have the menu for mobile rendered
+    if(window.innerWidth<960)
+    {
+      handleMobileMenuClose();
+    }
+
+ }
 
  const menuId = 'primary-search-account-menu';
  const renderMenu = (
@@ -154,8 +166,8 @@ export default function PrimarySearchAppBar() {
        </IconButton>
        <p>Messages</p>
      </MenuItem>
-     <MenuItem>
-       <IconButton aria-label="show 11 new notifications" color="inherit">
+     <MenuItem onClick={handleNotificationsOpen}>
+       <IconButton aria-label="show 11 new notifications"  color="inherit">
          <Badge badgeContent={11} color="secondary">
            <NotificationsIcon />
          </Badge>
@@ -169,7 +181,7 @@ export default function PrimarySearchAppBar() {
          aria-haspopup="true"
          color="inherit"
        >
-         <AccountCircle />
+         <img src={Person} className="person-icon-nav"/>
        </IconButton>
        <p>Profile</p>
      </MenuItem>
@@ -257,7 +269,7 @@ export default function PrimarySearchAppBar() {
                <MailIcon />
              </Badge>
            </IconButton>
-           <IconButton aria-label="show 17 new notifications" color="inherit">
+           <IconButton aria-label="show 17 new notifications" onClick={handleNotificationsOpen} color="inherit">
              <Badge badgeContent={17} color="secondary">
                <NotificationsIcon />
              </Badge>
@@ -270,7 +282,7 @@ export default function PrimarySearchAppBar() {
              onClick={handleProfileMenuOpen}
              color="inherit"
            >
-             <AccountCircle />
+           <img src={Person} className="person-icon-nav"/>
            </IconButton>
          </div>
          <div className={classes.sectionMobile}>
@@ -288,6 +300,16 @@ export default function PrimarySearchAppBar() {
      </AppBar>
      {renderMobileMenu}
      {renderMenu}
+     <div className="notifications-dropdown">
+     {/*deci avem urmatoarele tipuri de notificari
+        1 ziua cuiva
+        2 like la o postare
+        3 comentariu la o postare
+        4 cerere de prietenie
+       */}
+       <p className="notifications-title">Notitifications</p>
+       <p> X is celebrating his/her birthday!</p>
+     </div>
      <div className={open? "hidden-menu ": "hidden-menu hidden"}>
         <FontAwesomeIcon icon={faTimes} className="close-btn" onClick={toggleDrawer}/>
         <div className="item-container">
