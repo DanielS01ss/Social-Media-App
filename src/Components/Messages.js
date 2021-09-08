@@ -59,10 +59,12 @@ const Messages = ()=>{
     {!toggled && mobileView && <button onClick={handlePersonsListToggle} className={mobileView?"toggle-pers-list":"not-displayed"}> <FontAwesomeIcon icon={faArrowLeft} style={{marginRight:"10"}}/>See persons <FontAwesomeIcon icon={faUser}/> </button>}
     <div className="msg-texts-container">
         <div className="box3 sb13">
-          <p className="msg-text">Salut Geroge, ce mai faci? Cum mai esti? Cum mai este viata ta? Uite astazi am fost la magazin si am stat de vorba cu Marcel, il stii tu pe Marcel ala de vorbeam noi asa si apai mi-o zis ca numai are bani sa isi plateasca rata la casa si ca ar vrea sa plece afara in Germania la un abator ca sa faca un ban</p>
+          <p className="msg-text">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+
+</p>
         </div>
           <div className="box3 sb13">
-            <p className="msg-text">Salut Geroge, ce mai faci? Cum mai esti? Cum mai este viata ta? Uite astazi am fost la magazin si am stat de vorba cu Marcel, il stii tu pe Marcel ala de vorbeam noi asa si apai mi-o zis ca numai are bani sa isi plateasca rata la casa si ca ar vrea sa plece afara in Germania la un abator ca sa faca un ban</p>
+            <p className="msg-text">SLorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</p>
           </div>
           <div className="sb14 box3 answer">
             <p className="msg-text">Salut! Ba eu nu stiu ce sa zic, poate o fi o idee buna, poate nu o fi o idee buna, habar n-am</p>
