@@ -10,6 +10,7 @@ import FeedNavbar from './Components/FeedNavbar.js';
 import Test from "./Components/Test.js";
 import PageNotFound from './Components/PageNotFound.js';
 import Profile from "./Components/Profile.js";
+import Messages from "./Components/Messages.js";
 
 const App = ()=>{
 
@@ -25,7 +26,8 @@ const App = ()=>{
        <Route  path='/user'>
         <FeedNavbar/>
            <Route exact path="/user/profile" component={Profile}/>
-        <Route  path='/user/feed' component={MainPage}/>
+           <Route  path='/user/feed' component={MainPage}/>
+           <Route path='/user/message' component={Messages}/>
        </Route>
 
 
