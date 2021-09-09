@@ -344,55 +344,21 @@ export default function PrimarySearchAppBar() {
       </div>
     }
 
-
-
-
      <div className={open? "hidden-menu ": "hidden-menu hidden"}>
         <FontAwesomeIcon icon={faTimes} className="close-btn" onClick={toggleDrawer}/>
-        <div className="item-container">
-          <FontAwesomeIcon icon={faRss} className="icon-container-ham-menu"/>
-          <span className="inline-ham-menu">Feed</span>
-        </div>
+
 
         <div className="item-container item-large">
           <FontAwesomeIcon icon={faCommentDots} className="icon-container-ham-menu"/>
           < span className="inline-ham-menu">Chats</span>
         </div>
 
-        <div className="item-container item-large">
-          <FontAwesomeIcon icon={faVideo} className="icon-container-ham-menu"/>
-          <span className="inline-ham-menu">Videos</span>
-        </div>
-
-        <div className="item-container item-large">
-          <FontAwesomeIcon icon={faUserFriends} className="icon-container-ham-menu"/>
-          <span className="inline-ham-menu">Groups</span>
-        </div>
-
-        <div className="item-container item-large">
-          <FontAwesomeIcon icon={faBookmark} className="icon-container-ham-menu"/>
-          <span className="inline-ham-menu">Bookmarks</span>
-       </div>
 
        <div className="item-container item-large">
          <FontAwesomeIcon icon={faQuestionCircle} className="icon-container-ham-menu"/>
          <span className="inline-ham-menu">Questions</span>
        </div>
 
-       <div className="item-container item-large">
-         <FontAwesomeIcon icon={faBuilding} className="icon-container-ham-menu"/>
-         <span className="inline-ham-menu">Jobs</span>
-       </div>
-
-       <div className="item-container item-large">
-         <FontAwesomeIcon icon={faCalendar} className="icon-container-ham-menu"/>
-         <span className="inline-ham-menu">Events</span>
-       </div>
-
-       <div className="item-container item-large">
-         <FontAwesomeIcon icon={faGraduationCap} className="icon-container-ham-menu"/>
-         <span className="inline-ham-menu">Courses</span>
-       </div>
      </div>
    </div>
  );
