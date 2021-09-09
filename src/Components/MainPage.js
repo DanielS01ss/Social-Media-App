@@ -1,7 +1,7 @@
 import React ,{useEffect} from "react";
 import "../Styles/mainPage.css";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {faRss} from '@fortawesome/free-solid-svg-icons';
+
 import {faCommentDots}  from '@fortawesome/free-solid-svg-icons';
 import {faVideo} from '@fortawesome/free-solid-svg-icons';
 import {faUserFriends} from '@fortawesome/free-solid-svg-icons';
@@ -57,53 +57,15 @@ useEffect(()=>{
   return(
     <div className="main-container">
       <div className="side-nav options">
-
-       <div className="item-container">
-         <FontAwesomeIcon icon={faRss} className="icon-container"/>
-         <span className="inline">Feed</span>
-       </div>
-
        <div className="item-container item-large">
          <FontAwesomeIcon icon={faCommentDots} className="icon-container"/>
          < span className="inline">Chats</span>
        </div>
-
-       <div className="item-container item-large">
-         <FontAwesomeIcon icon={faVideo} className="icon-container"/>
-         <span className="inline">Videos</span>
-       </div>
-
-       <div className="item-container item-large">
-         <FontAwesomeIcon icon={faUserFriends} className="icon-container"/>
-         <span className="inline">Groups</span>
-       </div>
-
-       <div className="item-container item-large">
-         <FontAwesomeIcon icon={faBookmark} className="icon-container"/>
-         <span className="inline">Bookmarks</span>
-      </div>
-
       <div className="item-container item-large">
         <FontAwesomeIcon icon={faQuestionCircle} className="icon-container"/>
         <span className="inline">Questions</span>
       </div>
-
-      <div className="item-container item-large">
-        <FontAwesomeIcon icon={faBuilding} className="icon-container"/>
-        <span className="inline">Jobs</span>
-      </div>
-
-      <div className="item-container item-large">
-        <FontAwesomeIcon icon={faCalendar} className="icon-container"/>
-        <span className="inline">Events</span>
-      </div>
-
-      <div className="item-container item-large">
-        <FontAwesomeIcon icon={faGraduationCap} className="icon-container"/>
-        <span className="inline">Courses</span>
-      </div>
-
-      </div>
+    </div>
   <div className="main-content">
     <div className="post-card">
      <div className="form-container">
