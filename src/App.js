@@ -10,7 +10,9 @@ import FeedNavbar from './Components/FeedNavbar.js';
 import Test from "./Components/Test.js";
 import PageNotFound from './Components/PageNotFound.js';
 import Profile from "./Components/Profile.js";
+
 import About from "./Components/About.js";
+
 
 
 const App = ()=>{
@@ -29,6 +31,7 @@ const App = ()=>{
          <Route exact path='/user/feed' component={MainPage}/>
          <Route exact path="/user" component={PageNotFound}/>
       </Route>
+
       <Route exact path='/login' component={Login} >
       </Route>
       <Route path='/signup' component={SignUp}>
