@@ -32,6 +32,9 @@ import {faThumbsUp} from '@fortawesome/free-solid-svg-icons';
 import {faComments} from '@fortawesome/free-solid-svg-icons';
 import {faPlusSquare} from '@fortawesome/free-solid-svg-icons';
 import {faTrash} from '@fortawesome/free-solid-svg-icons';
+import {faUser} from '@fortawesome/free-solid-svg-icons';
+import {faCog} from '@fortawesome/free-solid-svg-icons';
+import {faDoorOpen} from '@fortawesome/free-solid-svg-icons';
 import Person from "../images/person.jpg";
 import Birthday from '../images/gift-box.png';
 
@@ -155,8 +158,9 @@ export default function PrimarySearchAppBar() {
      open={isMenuOpen}
      onClose={handleMenuClose}
    >
-     <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-     <MenuItem onClick={handleMenuClose}>My account</MenuItem>
+     <MenuItem onClick={handleMenuClose}><FontAwesomeIcon icon={faUser} style={{marginRight:"10"}}/> Profile</MenuItem>
+     <MenuItem onClick={handleMenuClose}><FontAwesomeIcon icon={faCog} style={{marginRight:"10"}}/> Settings</MenuItem>
+     <MenuItem onClick={handleMenuClose}><FontAwesomeIcon icon={faDoorOpen} style={{marginRight:"10"}}/> Logout</MenuItem>
    </Menu>
  );
 

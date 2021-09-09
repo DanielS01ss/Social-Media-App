@@ -1,4 +1,4 @@
-import React from "react";
+import React ,{useState} from "react";
 import "../Styles/Profile.css";
 import bkgImg from "../images/user-bkg.jpg";
 import userProfilePhoto from "../images/person.jpg";
@@ -29,9 +29,18 @@ const Profile = () =>{
       },
     },
   }));
-
+  const [toggleComments, setToggleComments] = useState(false);
+  const [liked,setLiked] = useState(false);
   const classes = useStyles();
   const [value, setValue] = React.useState('Controlled');
+
+  const handleToggleComm = ()=>{
+    setToggleComments(!toggleComments);
+  }
+
+  const handleLike = ()=>{
+    setLiked(!liked);
+  }
 
   return(
     <div>
@@ -99,7 +108,7 @@ const Profile = () =>{
            </div>
        </div>
        <div className="user-posts-container">
-             {/* HELLO AICI ESTE POST CONTAINER */}
+
            <div className="profile-post-container">
              <div className="header">
                  <img src={Person} className="person-avatar-online"/>
@@ -119,12 +128,41 @@ const Profile = () =>{
                   <img src={Post} alt="post-image" className="post-image"/>
                 </div>
                  <div className="post-feedback-section">
-                    <FontAwesomeIcon icon={faThumbsUp} className="icon-container like"/>
-                    <FontAwesomeIcon icon={faComment} className="icon-container like"/>
+                    <FontAwesomeIcon icon={faThumbsUp} style={{cursor:'pointer'}} onClick={handleLike} className={liked?"icon-container like post-elem-clicked":"icon-container"}/>
+                    <FontAwesomeIcon icon={faComment} style={{cursor:'pointer'}} onClick={handleToggleComm} className={toggleComments?"icon-container like post-elem-clicked":"icon-container"}/>
                  </div>
                 </div>
+
+                <div className={toggleComments? "post-comment-section" : "post-comment-section not-display"}>
+
+                   <TextField
+                   id="outlined-multiline-static"
+                   label="Add comment"
+                   multiline
+                   style={{width:"80%"}}
+                   rows={2}
+                   defaultValue=""
+                    />
+                    <Button variant="contained" className="btn btn-post" color="primary">
+                      Post
+                    </Button>
+                    <div className="previous-comments">
+
+                    <div className="card-reply">
+                        <div className="card-reply-header">
+                          <img src={Person} alt="person" className="person-avatar question-card-reply-person-image"/>
+                          <p className="card-reply-username">Person name said:</p>
+                        </div>
+                        <p className="card-reply-text-post">Eu sincer nu cred ca merg lucrurile asa cum spui tu, se poate sa gasesti o solutie mai buna</p>
+                    </div>
+
+                    </div>
+
+                </div>
+
+
              </div>
-         {/* AICI SE TERMINA POST CONTAINER*/}
+
        </div>
       </div>
     </div>
