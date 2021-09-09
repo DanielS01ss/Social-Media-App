@@ -10,10 +10,18 @@ import FeedNavbar from './Components/FeedNavbar.js';
 import Test from "./Components/Test.js";
 import PageNotFound from './Components/PageNotFound.js';
 import Profile from "./Components/Profile.js";
-
 import About from "./Components/About.js";
 
+const UserRoutePages = ()=>{
+  return(
+   <Switch>
+   <Route exact path="/user/profile" component={Profile}/>
+   <Route exact path='/user/feed' component={MainPage}/>
+   <Route exact path="*" component={PageNotFound}/>
+   </Switch>
 
+  )
+}
 
 const App = ()=>{
 
@@ -25,12 +33,11 @@ const App = ()=>{
        <Navbar/>
        <Home/>
      </Route>
-       <Route  path='/user'>
-        <FeedNavbar/>
-         <Route exact path="/user/profile" component={Profile}/>
-         <Route exact path='/user/feed' component={MainPage}/>
-         <Route exact path="/user" component={PageNotFound}/>
-      </Route>
+       <Route path="/user">
+          <FeedNavbar/>
+          <UserRoutePages/>
+       </Route>
+
 
       <Route exact path='/login' component={Login} >
       </Route>
@@ -42,9 +49,7 @@ const App = ()=>{
       </Switch>
       </Router>
     </div>
-
   )
-
 }
 
 export default App;
