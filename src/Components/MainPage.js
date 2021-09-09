@@ -1,7 +1,6 @@
-import React ,{useEffect} from "react";
+import React ,{useEffect,useState} from "react";
 import "../Styles/mainPage.css";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {faRss} from '@fortawesome/free-solid-svg-icons';
 import {faCommentDots}  from '@fortawesome/free-solid-svg-icons';
 import {faVideo} from '@fortawesome/free-solid-svg-icons';
 import {faUserFriends} from '@fortawesome/free-solid-svg-icons';
@@ -37,6 +36,8 @@ const MainPage =()=>{
 
 const classes = useStyles();
 const [value, setValue] = React.useState('Controlled');
+const [toggleComments, setToggleComments] = useState(false);
+const [liked,setLiked] = useState(false);
 
 const handleChange = (event) => {
  setValue(event.target.value);
@@ -44,6 +45,14 @@ const handleChange = (event) => {
 
 const resFunc = ()=>{
 
+}
+
+const handleToggleComm = ()=>{
+  setToggleComments(!toggleComments);
+}
+
+const handleLike = ()=>{
+  setLiked(!liked);
 }
 
 useEffect(()=>{
@@ -57,53 +66,15 @@ useEffect(()=>{
   return(
     <div className="main-container">
       <div className="side-nav options">
-
-       <div className="item-container">
-         <FontAwesomeIcon icon={faRss} className="icon-container"/>
-         <span className="inline">Feed</span>
-       </div>
-
        <div className="item-container item-large">
          <FontAwesomeIcon icon={faCommentDots} className="icon-container"/>
          < span className="inline">Chats</span>
        </div>
-
-       <div className="item-container item-large">
-         <FontAwesomeIcon icon={faVideo} className="icon-container"/>
-         <span className="inline">Videos</span>
-       </div>
-
-       <div className="item-container item-large">
-         <FontAwesomeIcon icon={faUserFriends} className="icon-container"/>
-         <span className="inline">Groups</span>
-       </div>
-
-       <div className="item-container item-large">
-         <FontAwesomeIcon icon={faBookmark} className="icon-container"/>
-         <span className="inline">Bookmarks</span>
-      </div>
-
       <div className="item-container item-large">
         <FontAwesomeIcon icon={faQuestionCircle} className="icon-container"/>
         <span className="inline">Questions</span>
       </div>
-
-      <div className="item-container item-large">
-        <FontAwesomeIcon icon={faBuilding} className="icon-container"/>
-        <span className="inline">Jobs</span>
-      </div>
-
-      <div className="item-container item-large">
-        <FontAwesomeIcon icon={faCalendar} className="icon-container"/>
-        <span className="inline">Events</span>
-      </div>
-
-      <div className="item-container item-large">
-        <FontAwesomeIcon icon={faGraduationCap} className="icon-container"/>
-        <span className="inline">Courses</span>
-      </div>
-
-      </div>
+    </div>
   <div className="main-content">
     <div className="post-card">
      <div className="form-container">
@@ -164,8 +135,35 @@ Ut est illum discere appellantur, vel porro exerci no. Mei tamquam maiestatis ad
           <img src={Post} alt="post-image" className="post-image"/>
         </div>
          <div className="post-feedback-section">
-            <FontAwesomeIcon icon={faThumbsUp} className="icon-container like"/>
-            <FontAwesomeIcon icon={faComment} className="icon-container like"/>
+            <FontAwesomeIcon icon={faThumbsUp} style={{"cursor":"pointer"}} onClick={handleLike} className={liked? "icon-container like post-elem-clicked":"icon-container like" }/>
+            <FontAwesomeIcon icon={faComment} onClick={handleToggleComm} style={{"cursor":"pointer"}} className={toggleComments? "icon-container post-elem-clicked":"icon-container"}/>
+         </div>
+
+         <div className={toggleComments? "post-comment-section" : "post-comment-section not-display"}>
+
+            <TextField
+            id="outlined-multiline-static"
+            label="Add comment"
+            multiline
+            style={{width:"80%"}}
+            rows={2}
+            defaultValue=""
+             />
+             <Button variant="contained" className="btn btn-post" color="primary">
+               Post
+             </Button>
+             <div className="previous-comments">
+
+             <div className="card-reply">
+                 <div className="card-reply-header">
+                   <img src={Person} alt="person" className="person-avatar question-card-reply-person-image"/>
+                   <p className="card-reply-username">Person name said:</p>
+                 </div>
+                 <p className="card-reply-text-post">Eu sincer nu cred ca merg lucrurile asa cum spui tu, se poate sa gasesti o solutie mai buna</p>
+             </div>
+
+             </div>
+
          </div>
         </div>
      </div>

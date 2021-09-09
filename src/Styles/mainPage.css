@@ -226,6 +226,30 @@
     justify-content: space-around;
 }
 
+.post-comment-section{
+  margin-top:30px;
+}
+
+.previous-comments{
+  margin-top:30px;
+}
+.btn-post{
+  margin-top:30px !important;
+  margin-left:10px !important;
+}
+
+.card-reply-text-post{
+  font-size: 1rem;
+}
+
+.post-elem-clicked{
+  color:blue;
+}
+
+.not-display{
+  display: none;
+}
+
 @media only screen and (max-width:1200px)
 {
 
