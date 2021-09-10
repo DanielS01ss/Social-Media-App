@@ -19,6 +19,7 @@ import {faHome} from '@fortawesome/free-solid-svg-icons';
 import {faCity} from '@fortawesome/free-solid-svg-icons';
 import {faHeart} from '@fortawesome/free-solid-svg-icons';
 import {faGraduationCap} from '@fortawesome/free-solid-svg-icons';
+import {Link} from "react-router-dom";
 
 const Profile = () =>{
   const useStyles = makeStyles((theme) => ({
@@ -57,7 +58,7 @@ const Profile = () =>{
             </p>
             <p className="user-contact-action">
             <FontAwesomeIcon icon = {faCommentAlt} className = "user-action-icon"/>
-            <span className="user-action-icon-label">Message</span>
+            <span className="user-action-icon-label"><Link style={{textDecoration:"none",fontSize:"1.3rem"}} to="/user/messages">Message</Link></span>
             </p>
           </div>
        </div>
