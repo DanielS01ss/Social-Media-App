@@ -68,7 +68,7 @@ const Login  = () =>{
 						</span>
 
 						<a href="#" className="txt2">
-							<Link to='/singup' className=''>Sign Up</Link>
+							<Link to='/signup' className=''>Sign Up</Link>
 						</a>
 					</div>
 				</form>

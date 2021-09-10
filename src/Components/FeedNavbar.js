@@ -37,6 +37,7 @@ import {faCog} from '@fortawesome/free-solid-svg-icons';
 import {faDoorOpen} from '@fortawesome/free-solid-svg-icons';
 import Person from "../images/person.jpg";
 import Birthday from '../images/gift-box.png';
+import {Link} from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
  grow: {
@@ -158,9 +159,9 @@ export default function PrimarySearchAppBar() {
      open={isMenuOpen}
      onClose={handleMenuClose}
    >
-     <MenuItem onClick={handleMenuClose}><FontAwesomeIcon icon={faUser} style={{marginRight:"10"}}/> Profile</MenuItem>
-     <MenuItem onClick={handleMenuClose}><FontAwesomeIcon icon={faCog} style={{marginRight:"10"}}/> Settings</MenuItem>
-     <MenuItem onClick={handleMenuClose}><FontAwesomeIcon icon={faDoorOpen} style={{marginRight:"10"}}/> Logout</MenuItem>
+     <MenuItem onClick={handleMenuClose}><FontAwesomeIcon icon={faUser} style={{marginRight:"10"}}/> <Link style={{textDecoration:"none",color:"#000"}} to="/user/profile"> Profile</Link></MenuItem>
+     <MenuItem onClick={handleMenuClose}><FontAwesomeIcon icon={faCog} style={{marginRight:"10"}}/> <Link style={{textDecoration:"none",color:"#000"}} to="/user/settings"> Settings </Link></MenuItem>
+     <MenuItem onClick={handleMenuClose}><FontAwesomeIcon icon={faDoorOpen} style={{marginRight:"10"}}/> Logout </MenuItem>
    </Menu>
  );
 
@@ -222,6 +223,7 @@ export default function PrimarySearchAppBar() {
   const [renderHamMenu,setRenderHamMenu] = useState(true);
   const [renderNotifications, setRenderNotifications] = useState(false);
   const [renderMessages,setRenderMessages] = useState(false);
+  const [renderHomeBtn,setRenderHomeBtn] = useState(false);
 
   useEffect(()=>{
     window.addEventListener("resize",handleDrawerAtResize);
@@ -231,10 +233,25 @@ export default function PrimarySearchAppBar() {
     } else {
       setRenderHamMenu(true);
     }
-    return ()=>{
-      window.removeEventListener("resize",handleDrawerAtResize);
+
+    if(window.location.pathname != "/user/feed")
+    {
+      setRenderHomeBtn(true);
+    } else {
+      setRenderHamMenu(false);
     }
-  },[])
+
+
+    console.log(window.location.pathname);
+
+    return ()=>{
+
+      window.removeEventListener("resize",handleDrawerAtResize);
+
+    }
+  })
+
+
 
  return (
    <div className={classes.grow}>
@@ -278,10 +295,14 @@ export default function PrimarySearchAppBar() {
              inputProps={{ 'aria-label': 'search' }}
            />
          </div>
-         <FontAwesomeIcon icon = {faHome} className="home-icon"/>
-         <p className="home-page-link">
-         Home
-         </p>
+
+         { renderHomeBtn  &&
+           <div style={{display:"flex",flexDirection:"row"}}>
+            <FontAwesomeIcon style={{marginTop:"8"}} icon = {faHome} className="home-icon"/>
+            <Link to='/user/feed' style={{textDecoration:"none"}}className="home-page-link">Home</Link>
+          </div>
+        }
+
          <div className={classes.grow} />
          <div className={classes.sectionDesktop}>
            <IconButton aria-label="show 4 new mails" color="inherit" onClick={handleMessagesMenu}>
