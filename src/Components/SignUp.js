@@ -12,7 +12,7 @@ const SignUp  = () =>{
      <div className="wrap-login100 p-l-55 p-r-55 p-t-65 p-b-54">
        <form className="login100-form validate-form">
          <span className="login100-form-title p-b-49">
-           Sing Up
+           Sign Up
          </span>
 
          <div className="wrap-input100 validate-input m-b-23" data-validate = "Username is reauired">
