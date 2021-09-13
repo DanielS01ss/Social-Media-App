@@ -68,3 +68,12 @@
   /* font-weight: bold; */
   font-size: 1.4rem;
 }
+
+.btn-left-margin{
+  margin-left: 10px !important;
+}
+
+.settings-select-input{
+  margin-top:10px;
+  float: left;
+}
