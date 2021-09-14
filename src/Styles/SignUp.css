@@ -1,0 +1,11 @@
+.wrong-credentials{
+  color:red;
+  margin-top: -3px !important;
+  font-size: 1.0rem;
+  font-weight: bold;
+}
+
+.disabled-btn{
+  cursor:default;
+  background-color:#ddb8fd
+}
