@@ -54,3 +54,21 @@
   background-color: #fff;
   color:#000;
 }
+
+@media only screen and (max-width:1000px){
+  .mainBtn{
+    margin-left: 20%;
+  }
+  .mainText{
+    margin-left: 10%;
+  }
+}
+
+@media only screen and (max-width:700px){
+  .mainBtn{
+    margin-left: 10%;
+  }
+  .mainText{
+    margin-left: 5%;
+  }
+}

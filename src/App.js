@@ -14,6 +14,7 @@ import About from "./Components/About.js";
 import Messages from "./Components/Messages.js";
 import Questions from "./Components/Questions.js";
 import Settings from "./Components/Settings.js";
+import Success from "./Components/Success.js";
 
 const UserRoutePages = ()=>{
   return(
@@ -44,7 +45,7 @@ const App = ()=>{
           <UserRoutePages/>
        </Route>
 
-
+      <Route exact path = "/register-success" component={Success}/>
       <Route exact path='/login' component={Login} >
       </Route>
       <Route path='/signup' component={SignUp}>
