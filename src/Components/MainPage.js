@@ -22,6 +22,7 @@ import Button from '@material-ui/core/Button';
 import Birthday from '../images/gift-box.png';
 import Add from '../images/snicker.jpg';
 import Post from "../images/dummy-post.jpg";
+import { Link } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -68,11 +69,15 @@ useEffect(()=>{
       <div className="side-nav options">
        <div className="item-container item-large">
          <FontAwesomeIcon icon={faCommentDots} className="icon-container"/>
-         < span className="inline">Chats</span>
+         < span className="inline">
+          <Link to="/user/messages" style={{textDecoration:"none",fontSize:"1.3rem", color:"#000"}}>Chats</Link>
+         </span>
        </div>
       <div className="item-container item-large">
         <FontAwesomeIcon icon={faQuestionCircle} className="icon-container"/>
-        <span className="inline">Questions</span>
+        <span className="inline">
+          <Link to="/user/questions" style={{textDecoration:"none",fontSize:"1.3rem", color:"#000"}}>Questions</Link>
+        </span>
       </div>
     </div>
   <div className="main-content">

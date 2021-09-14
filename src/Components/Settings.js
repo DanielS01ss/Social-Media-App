@@ -1,4 +1,4 @@
-import React,{useRef} from "react";
+import React,{useRef,useState} from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {faUserCog} from '@fortawesome/free-solid-svg-icons';
 import {faImages} from '@fortawesome/free-solid-svg-icons';
@@ -7,6 +7,8 @@ import Post from "../images/dummy-post.jpg";
 import Button from '@material-ui/core/Button';
 import userProfilePhoto from "../images/person.jpg";
 import TextField from '@material-ui/core/TextField';
+import { CountryDropdown, RegionDropdown, CountryRegionData } from 'react-country-region-selector';
+
 
 const Settings = ()=>{
 
@@ -22,6 +24,16 @@ const handleProfilePhotoInput = (evt)=>{
   hiddenProfilePhotoInput.current.click()
 }
 
+const [country,setCountry] = useState("");
+const [region,setRegion] = useState("");
+
+const selectCountry = (val)=> {
+  setCountry(val);
+}
+
+const selectRegion = (val)=>{
+  setRegion(val);
+}
 
     return(
       <div className="settings-container">
@@ -90,6 +102,74 @@ const handleProfilePhotoInput = (evt)=>{
              style={{width:"80%"}}
              rows={2}
              value="Details"
+             />
+               <Button variant="contained" className="btn" color="primary">
+                 Change
+               </Button>
+            </div>
+         </div>
+
+         <div className="settings-card">
+          <h3>From</h3>
+            <div className="change-name-input">
+          <CountryDropdown
+            value={country}
+              onChange={(val) =>selectCountry(val)} />
+            <RegionDropdown
+              country={country}
+              value={region}
+              onChange={(val) => selectRegion(val)} />
+               <Button variant="contained" className="btn btn-left-margin"  color="primary">
+                 Change
+               </Button>
+            </div>
+         </div>
+
+
+
+         <div className="settings-card">
+          <h3>Lives in</h3>
+            <div className="change-name-input">
+          <CountryDropdown
+            value={country}
+              onChange={(val) =>selectCountry(val)} />
+            <RegionDropdown
+              country={country}
+              value={region}
+              onChange={(val) => selectRegion(val)} />
+               <Button variant="contained" className="btn btn-left-margin"  color="primary">
+                 Change
+               </Button>
+            </div>
+         </div>
+
+
+         <div className="settings-card">
+          <h3>Relationship Status</h3>
+            <div className="change-name-input">
+              <input type="text"/>
+              <select className="settings-select-input" name="relationship-status">
+                <option value="Married">Married</option>
+                <option value="Single">Single</option>
+                <option value="In a relationship">In a relationship</option>
+              </select>
+               <Button variant="contained" className="btn "  color="primary">
+                 Change
+               </Button>
+            </div>
+         </div>
+
+         <div className="settings-card">
+          <h3>Studied at</h3>
+            <div className="change-name-input">
+
+            <TextField
+             id="outlined-multiline-static"
+             label="Where did you studied?"
+             multiline
+             style={{width:"80%"}}
+             rows={2}
+             value="University"
              />
                <Button variant="contained" className="btn" color="primary">
                  Change
