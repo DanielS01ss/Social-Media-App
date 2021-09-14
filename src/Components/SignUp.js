@@ -5,6 +5,10 @@ import {Link} from 'react-router-dom';
 import "../Styles/SignUp.css";
 import axios from "axios";
 import { useHistory } from "react-router-dom";
+import {faCheck} from '@fortawesome/free-solid-svg-icons';
+import {faTimes} from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
 
 let firstPasField ='';
 let repeatPassField = '';
@@ -27,6 +31,7 @@ const validateEmail = (email)=>{
   }
 }
 
+/* Form validation states */
 let [emailVal,setEmailVal] = useState("");
 let [validEmail,setValidEmail] = useState(false);
 let [validForm,setValidForm] = useState(false);
@@ -37,15 +42,23 @@ let [emailExists,setEmailExists] = useState(false);
 let [username,setUsername] = useState("");
 let [repeatPass,setRepeatPass] = useState("");
 
+
+/*password stregth states*/
+let [has8Digits,setHas8Digits] = useState(false);
+let [upperCaseLetter,setUpperCaseLetter] = useState(false);
+let [lowerCaseLetter,setLowerCaseLetter] = useState(false);
+let [hasOneDigit,setHasOneDigit] = useState(false);
+let [hasSpecialChars,setHasSpecialChars] = useState(false);
+
 useEffect(()=>{
-  if(passwordMatch && validEmail && username!='' && emailVal!='' && password!='' && !emailExists && !usernameExist)
+  if(passwordMatch && validEmail && username!='' && emailVal!='' && password!='' && !emailExists && !usernameExist && has8Digits && upperCaseLetter && lowerCaseLetter && hasOneDigit && hasSpecialChars)
   {
     setValidForm(true);
   } else {
     setValidForm(false);
   }
+},[username,emailVal,password,repeatPass,passwordMatch,validEmail,emailExists,usernameExist,has8Digits,upperCaseLetter,lowerCaseLetter,hasOneDigit,hasSpecialChars]);
 
-},[username,emailVal,password,repeatPass,passwordMatch,validEmail,emailExists,usernameExist]);
 
 const handleUserName = (txt)=>{
   const val = txt.target.value;
@@ -58,6 +71,54 @@ const handleUserName = (txt)=>{
   }
   setUsername(val);
 }
+
+useEffect(()=>{
+
+
+   const characterLength = new RegExp("(?=.{8,})");
+   const upperCaseLetterReg = new  RegExp("(?=.*[A-Z])");
+   const lowerCaseLetterReg = new RegExp("(?=.*[a-z])");
+   const hasOneDigitReg = new RegExp("(?=.*[0-9])");
+   const hasOneSpecial = new RegExp("(?=.*[0-9])");
+
+   ///test for character length
+   if(characterLength.test(password))
+   {
+     setHas8Digits(true);
+   } else{
+     setHas8Digits(false);
+   }
+
+   if(upperCaseLetterReg.test(password))
+   {
+     setUpperCaseLetter(true);
+   } else{
+     setUpperCaseLetter(false);
+   }
+
+   if(lowerCaseLetterReg.test(password))
+   {
+     setLowerCaseLetter(true);
+   } else{
+     setLowerCaseLetter(false);
+   }
+
+   if(hasOneDigitReg.test(password))
+   {
+     setHasOneDigit(true);
+   } else{
+     setHasOneDigit(false);
+   }
+
+   if(hasOneSpecial.test(password))
+   {
+     setHasSpecialChars(true);
+   } else{
+     setHasSpecialChars(false);
+   }
+
+},[password]);
+
 
 const handleEmail = (txt) =>{
   const value = txt.target.value;
@@ -124,28 +185,30 @@ const handleReq = async (e)=>{
         history.push("/register-success");
       }
   }).catch(err=>{
-    console.log(err.response);
-    if(err.response.data == "Username and email already exists!")
+    if(!err.response)
     {
-          oldUsername = username;
+      alert("Erro with backend server!");
+    } else{
+      if(err.response.data == "Username and email already exists!")
+      {
+            oldUsername = username;
+            oldEmail = emailVal;
+            setUserNameExist(true);
+            setEmailExists(true);
+      }
+      else if(err.response.data == "Username already exists!")
+      {
+            oldUsername = username;
+            setUserNameExist(true);
+      }
+      else if(err.response.data == "Email already exists!")
+      {
           oldEmail = emailVal;
-          setUserNameExist(true);
           setEmailExists(true);
-    }
-    else if(err.response.data == "Username already exists!")
-    {
-          oldUsername = username;
-          setUserNameExist(true);
-    }
-    else if(err.response.data == "Email already exists!")
-    {
-        oldEmail = emailVal;
-        setEmailExists(true);
+      }
     }
 
   });
-
-
 }
 
 return (
@@ -177,6 +240,15 @@ return (
            <span className="focus-input100" data-symbol="&#xf190;"></span>
          </div>
 
+
+          <div className="password-requirements-container">
+            <p className={has8Digits?"meets-prop prop-container":"does-not-meet-prop prop-container"}> { !has8Digits ? <FontAwesomeIcon icon={faTimes} className="prop-icon-container"/> : <FontAwesomeIcon icon={faCheck} className="prop-icon-container"/>}The password is at least 8 characters long</p>
+            <p className={upperCaseLetter?"meets-prop prop-container":"does-not-meet-prop prop-container"}> { !upperCaseLetter ? <FontAwesomeIcon icon={faTimes} className="prop-icon-container"/> : <FontAwesomeIcon icon={faCheck} className="prop-icon-container"/>}The password has at least one uppercase letter</p>
+            <p className={lowerCaseLetter?"meets-prop prop-container":"does-not-meet-prop prop-container"}> { !lowerCaseLetter ? <FontAwesomeIcon icon={faTimes} className="prop-icon-container"/> : <FontAwesomeIcon icon={faCheck} className="prop-icon-container"/>}The password has at least one lowercase letter</p>
+            <p className={hasOneDigit?"meets-prop prop-container":"does-not-meet-prop prop-container"}> { !hasOneDigit ? <FontAwesomeIcon icon={faTimes} className="prop-icon-container"/> : <FontAwesomeIcon icon={faCheck} className="prop-icon-container"/>}The password has at least one digit</p>
+            <p className={hasSpecialChars?"meets-prop prop-container":"does-not-meet-prop prop-container"}> { !hasSpecialChars ? <FontAwesomeIcon icon={faTimes} className="prop-icon-container"/> : <FontAwesomeIcon icon={faCheck} className="prop-icon-container"/>} The password has at least one special character</p>
+          </div>
+
          <div className="wrap-input100 validate-input" style={{'marginTop':'30px'}} data-validate="Password is required">
            <span className="label-input100">Repeat Password</span>
            <input className="input100" type="password" name="pass" value={repeatPass} onChange={handleRepeatPassword} placeholder="Type your password"/>
@@ -199,11 +271,7 @@ return (
      </div>
    </div>
  </div>
-
-
-
   )
-
 }
 
 export default SignUp;
