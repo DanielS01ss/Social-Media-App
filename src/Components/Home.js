@@ -1,9 +1,11 @@
-import React from 'react';
+import React,{useContext,useEffect} from 'react';
 import sample from '../media/video.mp4';
 import '../Styles/main.css';
 import {Link} from 'react-router-dom';
+import {AppContext} from "../Context/AppContext";
 
 const Home = () =>{
+
 
   return(
       <div className='main'>

@@ -8,7 +8,7 @@ import { useHistory } from "react-router-dom";
 import {faCheck} from '@fortawesome/free-solid-svg-icons';
 import {faTimes} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
+import {SIGNUP_URL} from "../Endpoints/API_ENDPOINTS";
 
 let firstPasField ='';
 let repeatPassField = '';
@@ -173,7 +173,6 @@ const handleReq = async (e)=>{
   };
   console.log(reqBody);
   e.preventDefault();
-    console.log("a");
   const res = await axios({
     method:'post',
     url:"http://localhost:8000/api/auth/register",
