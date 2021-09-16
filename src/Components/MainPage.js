@@ -1,4 +1,4 @@
-import React ,{useEffect,useState} from "react";
+import React ,{useEffect,useState,useContext} from "react";
 import "../Styles/mainPage.css";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {faCommentDots}  from '@fortawesome/free-solid-svg-icons';
@@ -23,6 +23,7 @@ import Birthday from '../images/gift-box.png';
 import Add from '../images/snicker.jpg';
 import Post from "../images/dummy-post.jpg";
 import { Link } from "react-router-dom";
+import {AppContext} from "../Context/AppContext";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -56,6 +57,9 @@ const handleLike = ()=>{
   setLiked(!liked);
 }
 
+const ContextApp = useContext(AppContext);
+const user = ContextApp.user;
+
 useEffect(()=>{
     window.addEventListener('resize',resFunc);
 
@@ -84,7 +88,7 @@ useEffect(()=>{
     <div className="post-card">
      <div className="form-container">
      <div className="person-avatar-container">
-       <img src={Person} alt="person" className="person-avatar"/>
+       <img src={`data:image/jpeg;base64,${user.profilePicture}`} alt="person" className="person-avatar"/>
      </div>
         <form className={`${classes.root} text-input`} noValidate autoComplete="off">
         <TextField

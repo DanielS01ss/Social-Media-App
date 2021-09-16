@@ -1,4 +1,4 @@
-import React ,{useState, useEffect} from 'react';
+import React ,{useState, useEffect,useContext} from 'react';
 import { alpha, makeStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
@@ -38,6 +38,12 @@ import {faDoorOpen} from '@fortawesome/free-solid-svg-icons';
 import Person from "../images/person.jpg";
 import Birthday from '../images/gift-box.png';
 import {Link} from "react-router-dom";
+import axios from "axios";
+import {DELETE_TOKEN_URL} from "../Endpoints/API_ENDPOINTS.js";
+import {AppContext} from "../Context/AppContext";
+import {useHistory} from "react-router-dom";
+import {clearCookies} from "../utility-functions/utility-functions.js";
+
 
 const useStyles = makeStyles((theme) => ({
  grow: {
@@ -120,7 +126,41 @@ export default function PrimarySearchAppBar() {
    setMobileMoreAnchorEl(null);
  };
 
- const handleMenuClose = () => {
+ const history = useHistory();
+ const handleLogout = ()=>{
+  if(document.cookie)
+  {
+    const refreshTk = document.cookie.split(";")[1].split("=")[1];
+    clearCookies();
+    AppContextData.isLoggedIn = false;
+    const reqData = {
+      token:refreshTk
+    }
+
+    axios({
+      method:'delete',
+      url:DELETE_TOKEN_URL,
+      data:reqData
+    }).then(resp=>{
+      console.log(resp);
+    }).catch(err=>{
+      console.log(err);
+    });
+  }
+  else {
+    console.log("No cookies today!");
+  }
+
+  history.push("/");
+ }
+
+
+ const handleMenuClose = (evt) => {
+   console.log(evt.target.textContent);
+   if(evt.target.textContent == 'Logout')
+   {
+
+   }
    setAnchorEl(null);
    handleMobileMenuClose();
  };
@@ -159,9 +199,9 @@ export default function PrimarySearchAppBar() {
      open={isMenuOpen}
      onClose={handleMenuClose}
    >
-     <MenuItem onClick={handleMenuClose}><FontAwesomeIcon icon={faUser} style={{marginRight:"10"}}/> <Link style={{textDecoration:"none",color:"#000"}} to="/user/profile"> Profile</Link></MenuItem>
-     <MenuItem onClick={handleMenuClose}><FontAwesomeIcon icon={faCog} style={{marginRight:"10"}}/> <Link style={{textDecoration:"none",color:"#000"}} to="/user/settings"> Settings </Link></MenuItem>
-     <MenuItem onClick={handleMenuClose}><FontAwesomeIcon icon={faDoorOpen} style={{marginRight:"10"}}/> Logout </MenuItem>
+     <MenuItem onClick={handleMenuClose} name="Profile"><FontAwesomeIcon icon={faUser} style={{marginRight:"10"}}/> <Link style={{textDecoration:"none",color:"#000"}} to="/user/profile"> Profile</Link></MenuItem>
+     <MenuItem onClick={handleMenuClose} name="Settings"><FontAwesomeIcon icon={faCog} style={{marginRight:"10"}}/> <Link style={{textDecoration:"none",color:"#000"}} to="/user/settings"> Settings </Link></MenuItem>
+     <MenuItem onClick={handleMenuClose} name="Logout" onClick={handleLogout}><FontAwesomeIcon icon={faDoorOpen} style={{marginRight:"10"}}/> Logout </MenuItem>
    </Menu>
  );
 
@@ -251,7 +291,7 @@ export default function PrimarySearchAppBar() {
     }
   })
 
-
+ const AppContextData = useContext(AppContext);
 
  return (
    <div className={classes.grow}>
@@ -323,7 +363,7 @@ export default function PrimarySearchAppBar() {
              onClick={handleProfileMenuOpen}
              color="inherit"
            >
-           <img src={Person} className="person-icon-nav"/>
+           <img src={`data:image/jpeg;base64,${AppContextData.user.profilePicture}`} className="person-icon-nav"/>
            </IconButton>
          </div>
          <div className={classes.sectionMobile}>
