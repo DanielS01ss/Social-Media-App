@@ -41,24 +41,30 @@ const setCookie = (token,refreshToken)=>{
 }
 
  const handleLogin = (evt)=>{
+   console.log("I am here")
     evt.preventDefault();
-    console.log("LOGIN URL:",LOGIN_URL);
     axios.post(LOGIN_URL,{
       email:email,
       password:pass
     }).then(resp=>{
-      console.log(resp);
+
       if(resp.status == 200)
       {
-          // ContextApp.isLoggedIn = true;
-          // ContextApp.user = resp.data.user;
           setCookie(resp.data.token,resp.data.refreshToken);
+
+          ContextApp.updateUser(resp.data.user);
+          ContextApp.updateToken(resp.data.token);
+          ContextApp.updateRefreshToken(resp.data.refreshToken);
+          ContextApp.setLoggedIn(true);
+          // console.log("Context App From Login:",ContextApp);
           history.push("/user/feed");
+
       }
     }).catch(err=>{
+
       if(err.response)
       {
-        if(err.response.status == 404 || err.response.status == 401)
+        if(err.response.status == 404 || err.response.status == 401 || err.response.status == 403)
         {
           setWrongCredentials(true);
         }
@@ -150,11 +156,7 @@ const setCookie = (token,refreshToken)=>{
 			</div>
 		</div>
 	</div>
-
-
-
   )
-
 }
 
 export default Login;

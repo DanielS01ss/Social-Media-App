@@ -16,7 +16,7 @@ let emVl = false;
 
 let oldUsername = null;
 let oldEmail = null;
-
+ 
 
 const SignUp  = () =>{
 
@@ -51,6 +51,7 @@ let [hasOneDigit,setHasOneDigit] = useState(false);
 let [hasSpecialChars,setHasSpecialChars] = useState(false);
 
 useEffect(()=>{
+   console.log( username);
   if(passwordMatch && validEmail && username!='' && emailVal!='' && password!='' && !emailExists && !usernameExist && has8Digits && upperCaseLetter && lowerCaseLetter && hasOneDigit && hasSpecialChars)
   {
     setValidForm(true);
@@ -69,6 +70,7 @@ const handleUserName = (txt)=>{
       setUserNameExist(false);
     }
   }
+
   setUsername(val);
 }
 
@@ -155,10 +157,12 @@ const handleRepeatPassword = (txt)=>{
   const val = txt.target.value;
   if(val == password)
   {
+
     setPasswordMatch(true)
   } else {
     setPasswordMatch(false);
   }
+
   setRepeatPass(val);
 }
 

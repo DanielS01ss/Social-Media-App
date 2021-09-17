@@ -1,4 +1,4 @@
-import React ,{useState} from "react";
+import React ,{useState,useContext,useEffect} from "react";
 import "../Styles/Profile.css";
 import bkgImg from "../images/user-bkg.jpg";
 import userProfilePhoto from "../images/person.jpg";
@@ -20,6 +20,8 @@ import {faCity} from '@fortawesome/free-solid-svg-icons';
 import {faHeart} from '@fortawesome/free-solid-svg-icons';
 import {faGraduationCap} from '@fortawesome/free-solid-svg-icons';
 import {Link} from "react-router-dom";
+import {AppContext} from "../Context/AppContext";
+
 
 const Profile = () =>{
   const useStyles = makeStyles((theme) => ({
@@ -42,6 +44,13 @@ const Profile = () =>{
   const handleLike = ()=>{
     setLiked(!liked);
   }
+
+  const ContextAppData = useContext(AppContext);
+  const user = ContextAppData.user;
+
+  useEffect(()=>{
+    console.log(user);
+  },[])
 
   return(
     <div>
@@ -156,14 +165,9 @@ const Profile = () =>{
                         </div>
                         <p className="card-reply-text-post">Eu sincer nu cred ca merg lucrurile asa cum spui tu, se poate sa gasesti o solutie mai buna</p>
                     </div>
-
                     </div>
-
                 </div>
-
-
              </div>
-
        </div>
       </div>
     </div>
