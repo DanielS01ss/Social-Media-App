@@ -161,7 +161,7 @@ export default function PrimarySearchAppBar() {
 
 
  const handleMenuClose = (evt) => {
-   console.log(evt.target.textContent);
+
    if(evt.target.textContent == 'Logout')
    {
 
@@ -273,8 +273,7 @@ export default function PrimarySearchAppBar() {
 
   useEffect(()=>{
 
-    console.log("Feed Navbar isLoading:",isLoading);
-    console.log("Feed Navbar Context:",AppContextData);
+
     AppContextData.reload();
     window.addEventListener("resize",handleDrawerAtResize);
     if(window.location.pathname == "/user/profile")
@@ -294,17 +293,16 @@ export default function PrimarySearchAppBar() {
     if(AppContextData.user){
       setIsLoading(false);
     }
-    console.log(window.location.pathname);
+
     return ()=>{
       window.removeEventListener("resize",handleDrawerAtResize);
     }
   },[])
 
 
-if(!isLoading){
+if(AppContextData.user.user){
  return (
    <div className={classes.grow}>
-   {console.log("From feed Navbar return function  AppContextData:",AppContextData)}
 
      <AppBar position="static"  style={{
         position:"fixed",
@@ -344,12 +342,10 @@ if(!isLoading){
            />
          </div>
 
-         { renderHomeBtn  &&
            <div style={{display:"flex",flexDirection:"row"}}>
             <FontAwesomeIcon style={{marginTop:"8"}} icon = {faHome} className="home-icon"/>
             <Link to='/user/feed' style={{textDecoration:"none"}}className="home-page-link">Home</Link>
           </div>
-        }
 
          <div className={classes.grow} />
          <div className={classes.sectionDesktop}>
@@ -433,7 +429,7 @@ if(!isLoading){
        </div>
 
      </div>
-   
+
    </div>
  ) }
  else {

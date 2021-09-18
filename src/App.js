@@ -142,6 +142,7 @@ const App = ()=>{
     refreshToken:'',
     setLoggedIn:setLoggedIn,
     setIsLoading:setIsLoading,
+    isLoading:isLoading,
     reload:reloadhDataAfterRefresh,
     updateUser:updateUser,
     updateToken:updateToken,

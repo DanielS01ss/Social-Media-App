@@ -66,8 +66,7 @@ useEffect(()=>{
     window.addEventListener('resize',resFunc);
     // ContextApp.reload();
     // user = ContextApp.user.user;
-    console.log("From MainPage isLoading:",isLoadingData);
-    console.log("From MainPage ContextApp:",ContextApp);
+
     if(ContextApp.user){
       setIsLoadingData(false);
     }
@@ -76,11 +75,11 @@ useEffect(()=>{
     }
 },[]);
 
-  if(!isLoadingData)
+  if(ContextApp.user.user)
   {
     return(
       <div className="main-container">
-      {console.log("From Main Page return function  ContextApp:",ContextApp)}
+
       <div className="side-nav options">
      <div className="item-container item-large">
        <FontAwesomeIcon icon={faCommentDots} className="icon-container"/>
@@ -210,7 +209,7 @@ useEffect(()=>{
     )
   } else {
     return(
-      <Loading/>
+      <div></div>
     )
   }
 

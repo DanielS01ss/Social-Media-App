@@ -77,3 +77,24 @@
   margin-top:10px;
   float: left;
 }
+
+.sub-note{
+  margin-top:20px;
+  font-size:1.3rem;
+}
+
+.img-load-error{
+  color:red;
+  font-size: 1.3rem;
+  font-weight: bold;
+}
+
+.img-load-success{
+   color:green;
+   font-size:1.4rem;
+   font-weight: bold;
+}
+
+.img-sub-msg{
+  margin-bottom: 80px;
+}
