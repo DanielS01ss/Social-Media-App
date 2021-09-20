@@ -119,6 +119,7 @@ const App = ()=>{
   }
 
 
+
   const updateUser = (user)=>{
     setUser(user);
   }
@@ -156,6 +157,56 @@ const App = ()=>{
 
 },[]);
 
+
+
+ if(isLoading)
+ {
+   return(
+     <Loading/>
+   )
+ } else {
+   return (
+     <div>
+       <Router>
+     <AppContext.Provider value={data}>
+         <Switch>
+         <Route exact path='/' component={Home}>
+           <Navbar/>
+           <Home/>
+         </Route>
+
+     <Route path="/user" key="data" render ={()=>{
+         if(loggedIn)
+         {
+           return(
+             <>
+             <FeedNavbar key="data"/>
+             <UserRoutePages/>
+             </>
+           )
+         } else {
+           return(
+             <Redirect to='/login'/>
+           )
+         }
+
+     }}/>
+
+       <Route exact path = "/register-success" component={Success}/>
+       <Route exact path='/login' component={Login} >
+       </Route>
+       <Route path='/signup' component={SignUp}>
+       </Route>
+       <Route path='/about' component={About}>
+       </Route>
+       <Route component={PageNotFound}/>
+       </Switch>
+       </AppContext.Provider>
+       </Router>
+
+     </div>
+   )
+ }
 
  //
  // if(isLoading)

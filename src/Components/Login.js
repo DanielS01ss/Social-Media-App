@@ -38,27 +38,34 @@ const setCookie = (token,refreshToken)=>{
     let expires = "expires="+d.toUTCString();
     document.cookie = `token=${token}; expires=${expires}`;
     document.cookie = `refreshToken=${refreshToken}; expires=${expires}`;
+    console.log(document.cookie);
 }
 
  const handleLogin = (evt)=>{
+   console.log("I am here")
     evt.preventDefault();
-    console.log("LOGIN URL:",LOGIN_URL);
     axios.post(LOGIN_URL,{
       email:email,
       password:pass
     }).then(resp=>{
-      console.log(resp);
+
       if(resp.status == 200)
       {
-          // ContextApp.isLoggedIn = true;
-          // ContextApp.user = resp.data.user;
           setCookie(resp.data.token,resp.data.refreshToken);
+
+          ContextApp.updateUser(resp.data.user);
+          ContextApp.updateToken(resp.data.token);
+          ContextApp.updateRefreshToken(resp.data.refreshToken);
+          ContextApp.setLoggedIn(true);
+          // console.log("Context App From Login:",ContextApp);
           history.push("/user/feed");
+
       }
     }).catch(err=>{
+
       if(err.response)
       {
-        if(err.response.status == 404 || err.response.status == 401)
+        if(err.response.status == 404 || err.response.status == 401 || err.response.status == 403)
         {
           setWrongCredentials(true);
         }
@@ -118,7 +125,7 @@ const setCookie = (token,refreshToken)=>{
           { wrongCredentials && <p className="wrong-credentials-header">WRONG CREDENTIALS!</p>}
 					<div className="wrap-input100 validate-input m-b-23" data-validate = "Username is reauired">
 						<span className="label-input100">Email</span>
-						<input className="input100" onChange={handleEmail} value={email} type="text" name="username" placeholder="Type your username"/>
+						<input className="input100" onChange={handleEmail} value={email} type="text" name="username" placeholder="Type your email"/>
 						<span className="focus-input100" data-symbol="&#xf206;"></span>
 					</div>
           {!validEmail && <p className="wrong-credentials" style={{marginBottom:"20px"}}>Email not valid!</p>}
@@ -150,11 +157,7 @@ const setCookie = (token,refreshToken)=>{
 			</div>
 		</div>
 	</div>
-
-
-
   )
-
 }
 
 export default Login;

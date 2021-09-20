@@ -52,6 +52,11 @@
     font-size: 1.3rem;
 }
 
+.home-page-link:hover{
+    color:#fff;
+    font-size: 1.3rem;
+}
+
 .home-icon{
   margin-right: 5px;
 }

@@ -43,6 +43,7 @@ import {DELETE_TOKEN_URL} from "../Endpoints/API_ENDPOINTS.js";
 import {AppContext} from "../Context/AppContext";
 import {useHistory} from "react-router-dom";
 import {clearCookies} from "../utility-functions/utility-functions.js";
+import Loading from '../Components/Loading.js';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -128,11 +129,15 @@ export default function PrimarySearchAppBar() {
 
  const history = useHistory();
  const handleLogout = ()=>{
+
+
   if(document.cookie)
   {
     const refreshTk = document.cookie.split(";")[1].split("=")[1];
     clearCookies();
-    AppContextData.isLoggedIn = false;
+    // AppContextData.setLoggedIn(false);
+    // AppContextData.setIsLoading(true);
+
     const reqData = {
       token:refreshTk
     }
@@ -149,14 +154,14 @@ export default function PrimarySearchAppBar() {
   }
   else {
     console.log("No cookies today!");
-  }
+    }
 
-  history.push("/");
+      history.push("/");
  }
 
 
  const handleMenuClose = (evt) => {
-   console.log(evt.target.textContent);
+
    if(evt.target.textContent == 'Logout')
    {
 
@@ -258,14 +263,18 @@ export default function PrimarySearchAppBar() {
       setOpen(false);
   }
 
-
+  const [isLoading,setIsLoading] = useState(true);
   const notifications = [];
   const [renderHamMenu,setRenderHamMenu] = useState(true);
   const [renderNotifications, setRenderNotifications] = useState(false);
   const [renderMessages,setRenderMessages] = useState(false);
   const [renderHomeBtn,setRenderHomeBtn] = useState(false);
+   const AppContextData = useContext(AppContext);
 
   useEffect(()=>{
+
+
+    AppContextData.reload();
     window.addEventListener("resize",handleDrawerAtResize);
     if(window.location.pathname == "/user/profile")
     {
@@ -281,20 +290,20 @@ export default function PrimarySearchAppBar() {
       setRenderHamMenu(false);
     }
 
-
-    console.log(window.location.pathname);
+    if(AppContextData.user){
+      setIsLoading(false);
+    }
 
     return ()=>{
-
       window.removeEventListener("resize",handleDrawerAtResize);
-
     }
-  })
+  },[])
 
- const AppContextData = useContext(AppContext);
 
+if(AppContextData.user.user){
  return (
    <div className={classes.grow}>
+
      <AppBar position="static"  style={{
         position:"fixed",
 
@@ -305,7 +314,7 @@ export default function PrimarySearchAppBar() {
         background: "linear-gradient(right, #00dbde, #fc00ff, #00dbde, #fc00ff) !important"
       }}>
        <Toolbar>
-       {/* This is the drawer button */}
+
    {renderHamMenu && <IconButton
       edge="start"
       className={`${classes.menuButton} sidebar`}
@@ -316,9 +325,6 @@ export default function PrimarySearchAppBar() {
       <MenuIcon />
     </IconButton> }
 
-
-
-      {/* This is the drawer button */}
          <Typography className={classes.title} variant="h6" noWrap>
            Peach Pen
          </Typography>
@@ -336,12 +342,10 @@ export default function PrimarySearchAppBar() {
            />
          </div>
 
-         { renderHomeBtn  &&
            <div style={{display:"flex",flexDirection:"row"}}>
             <FontAwesomeIcon style={{marginTop:"8"}} icon = {faHome} className="home-icon"/>
             <Link to='/user/feed' style={{textDecoration:"none"}}className="home-page-link">Home</Link>
           </div>
-        }
 
          <div className={classes.grow} />
          <div className={classes.sectionDesktop}>
@@ -363,7 +367,7 @@ export default function PrimarySearchAppBar() {
              onClick={handleProfileMenuOpen}
              color="inherit"
            >
-           <img src={`data:image/jpeg;base64,${AppContextData.user.profilePicture}`} className="person-icon-nav"/>
+           <img src={`data:image/jpeg;base64,${AppContextData.user.user.profilePicture}`} className="person-icon-nav"/>
            </IconButton>
          </div>
          <div className={classes.sectionMobile}>
@@ -425,6 +429,10 @@ export default function PrimarySearchAppBar() {
        </div>
 
      </div>
+
    </div>
- );
+ ) }
+ else {
+   return(<Loading/>)
+ }
 }
