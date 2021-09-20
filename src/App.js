@@ -20,9 +20,10 @@ import {AppContext} from "./Context/AppContext";
 import React , {useContext,useEffect, useState} from "react";
 import { Redirect } from "react-router-dom";
 import axios from "axios";
-import {CHECK_TOKEN_URL} from "./Endpoints/API_ENDPOINTS";
+import {CHECK_TOKEN_URL,GET_USER_URL} from "./Endpoints/API_ENDPOINTS";
 import { useHistory } from "react-router-dom";
 import {useSetLoggedInTrue} from "./utility-functions/useSetLogin";
+import jwt_decode from "jwt-decode";
 
 const UserRoutePages = ()=>{
   return(
@@ -40,42 +41,123 @@ const UserRoutePages = ()=>{
 
 const App = ()=>{
 
+    const getUserAndSet = (myToken)=>{
+      const data = {
+        token : myToken
+      }
+
+      axios.post(GET_USER_URL, {"body":data}, {
+       headers: {
+       'Content-Type': 'application/json',
+       'Authorization':'Bearer '+myToken
+       }
+     }
+   ).then(resp=>{
+
+     if(resp.data != null)
+     {
+       setTimeout(()=>{
+         setIsLoading(false);
+         setUser(resp.data);
+       },1000);
+     } else {
+       setTimeout(()=>{
+         setIsLoading(false);
+         setLoggedIn(false);
+       },1000);
+     }
+
+   }).catch(err=>{
+     console.log(err);
+     setTimeout(()=>{
+         setIsLoading(false);
+         setLoggedIn(false);
+     },1000);
+   })
+  }
+
+
+  const reloadhDataAfterRefresh = ()=>{
+    const myToken = document.cookie.split(";")[0].split("=")[1];
+    if(myToken)
+    {
+
+      fetch(CHECK_TOKEN_URL,{
+          method:"POST",
+          headers: {"Content-type": "application/json;charset=UTF-8"},
+          body:JSON.stringify({
+            token:myToken
+          })
+      }).then(resp=>{
+
+        console.log("hello");
+        if(resp.status == 200){
+          setLoggedIn(true);
+          getUserAndSet(myToken);
+
+        } else{
+          setTimeout(()=>{
+              setIsLoading(false);
+              setLoggedIn(false);
+          },1000);
+        }
+        console.log("Hello from response:",resp);
+      }).catch(err=>{
+        console.log("Hello from catch statement");
+        console.log(err);
+            setTimeout(()=>{
+                setIsLoading(false);
+                setLoggedIn(false);
+            },1000);
+          });
+    } else {
+      setTimeout(()=>{
+          setIsLoading(false);
+          setLoggedIn(false);
+      },1000);
+    }
+  }
+
+
+
+  const updateUser = (user)=>{
+    setUser(user);
+  }
+
+  const updateToken = (tk)=>{
+    data.token = tk;
+  }
+
+  const updateRefreshToken = (tk)=>{
+    data.refreshToken = tk;
+  }
 
   const [loggedIn, setLoggedIn] = useState(false);
+  let [user,setUser] = useState({});
   const [isLoading, setIsLoading] = useState(true);
+  const data = {
+    user:user,
+    setUser:setUser,
+    token:'',
+    refreshToken:'',
+    setLoggedIn:setLoggedIn,
+    setIsLoading:setIsLoading,
+    isLoading:isLoading,
+    reload:reloadhDataAfterRefresh,
+    updateUser:updateUser,
+    updateToken:updateToken,
+    updateRefreshToken:updateRefreshToken,
+    getUserAndSet:getUserAndSet
+  }
+
 
 
   useEffect(()=>{
-    const myToken = document.cookie.split(";")[0].split("=")[1];
-    console.log(myToken);
-
-    if(myToken)
-    {
-      let xhr = new XMLHttpRequest();
-      xhr.open("GET",CHECK_TOKEN_URL);
-      const reqBody =  {
-        token:myToken
-      }
-
-      xhr.send(JSON.stringify(reqBody));
-      xhr.onload =()=>{
-        console.log("I've loaded succesfully!");
-        console.log(xhr.status);
-        if(xhr.status == 200){
-          console.log("Hello the status is 200!");
-          setLoggedIn(true);
-          setTimeout(()=>{
-              setIsLoading(false);
-          },1000);
-
-        }
-      }
-      xhr.onerror = ()=>{
-        console.log("I've got an error!");
-      }
-    }
+    reloadhDataAfterRefresh();
 
 },[]);
+
+
 
  if(isLoading)
  {
@@ -86,9 +168,8 @@ const App = ()=>{
    return (
      <div>
        <Router>
-     <AppContext.Provider >
+     <AppContext.Provider value={data}>
          <Switch>
-
          <Route exact path='/' component={Home}>
            <Navbar/>
            <Home/>
@@ -107,7 +188,6 @@ const App = ()=>{
            return(
              <Redirect to='/login'/>
            )
-
          }
 
      }}/>

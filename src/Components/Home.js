@@ -6,6 +6,11 @@ import {AppContext} from "../Context/AppContext";
 
 const Home = () =>{
 
+const AppDataContext = useContext(AppContext);
+
+useEffect(()=>{
+  console.log("From home:",AppDataContext);
+},[])
 
   return(
       <div className='main'>

@@ -1,8 +1,8 @@
 
-
-const clearCookies = ()=>{
-  document.cookie = "token=''; expires= Thu, 21 Aug 2014 20:00:00 UTC";
-  document.cookie = "refreshToken=''; expires= Thu, 21 Aug 2014 20:00:00 UTC";
+function clearCookies( wildcardDomain=false, primaryDomain=true, path=null ){
+  document.cookie.split(";").forEach(function(c) {
+      document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+  });
 }
 
 export {clearCookies}
