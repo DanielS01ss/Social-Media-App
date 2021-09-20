@@ -79,7 +79,7 @@ const Profile = () =>{
             <div className="profile-info">
               <p className="profile-info-title">User Description</p>
               <p className="profile-info-item"> <FontAwesomeIcon icon={faHome} className="profile-description-icon"/>From:</p><span>{ContextAppData.user.user.from}</span>
-              <p className="profile-info-item"><FontAwesomeIcon icon={faCity} className="profile-description-icon"/>Lives in:</p><span>{ContextAppData.user.user.city}</span>
+              <p className="profile-info-item"><FontAwesomeIcon icon={faCity} className="profile-description-icon"/>Lives in:</p><span>{ContextAppData.user.user.livesIn}</span>
               <p className="profile-info-item"><FontAwesomeIcon icon={faHeart} className="profile-description-icon"/>Relationship Status:</p>
               {
                 (() => {
@@ -99,7 +99,7 @@ const Profile = () =>{
                 })()
 
               }
-              <p className="profile-info-item"><FontAwesomeIcon icon={faGraduationCap} className="profile-description-icon"/>Studied at:</p><span>{ContextAppData.user.user.university}</span>
+              <p className="profile-info-item"><FontAwesomeIcon icon={faGraduationCap} className="profile-description-icon"/>Studied at:</p><span>{ContextAppData.user.user.education}</span>
             </div>
             <div className="profile-submit-post">
              <div className="profile-form-container">

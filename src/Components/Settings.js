@@ -9,24 +9,12 @@ import userProfilePhoto from "../images/person.jpg";
 import TextField from '@material-ui/core/TextField';
 import { CountryDropdown, RegionDropdown, CountryRegionData } from 'react-country-region-selector';
 import {AppContext} from "../Context/AppContext";
+import {UPDATE_USER,DELETE_TOKEN_URL} from "../Endpoints/API_ENDPOINTS";
+import axios from "axios";
 
+const _ = require("lodash");
 
 const Settings = ()=>{
-
-const ContextApp = useContext(AppContext);
-const inputFile = useRef(null);
-const hiddenCoverPhotoInput = useRef(null);
-const hiddenProfilePhotoInput = useRef(null);
-const coverPhotoImage = useRef(null);
-const profilePhotoImage = useRef(null);
-
-const handleCoverPhotoInput = (evt)=>{
-  hiddenCoverPhotoInput.current.click();
-}
-
-const handleProfilePhotoInput = (evt)=>{
-  hiddenProfilePhotoInput.current.click()
-}
 
 const [countryFrom,setCountryFrom] = useState("");
 const [regionFrom,setRegionFrom] = useState("");
@@ -38,30 +26,112 @@ const [coverPictureErr, setCoverPictureErr] = useState(false);
 const [profilePictureErr, setProfilePictureErr] = useState(false);
 const [successProfileImg,setSuccessProfileImg] = useState(false);
 const [successCoverImg,setSuccessCoverImg] = useState(false);
+const [password,setPassword] = useState("");
+const [repeatPassword,setRepeatPassword] = useState("");
+const [passMatch,setPassMatch] = useState(false);
+const [profileImageUploaded,setProfileImageUploaded] = useState(false);
+const [coverImageUploaded,setCoverImageUploaded] = useState(false);
+const [coverImageObj,setCoverImageObj] = useState({});
+const [profileImageObj,setProfileImageObj] = useState({});
+const [usernameSuccess,setUsernameSuccess] = useState(false);
+const [passwordSuccess,setPasswordSuccess] = useState(false);
+const [descriptionSuccess,setDescriptionSuccess] = useState(false);
+const [fromSuccess,setFromSuccess] = useState(false);
+const [livesSuccess,setLivesSuccess] = useState(false);
+const [usernameEmpty,setUsernameEmpty] = useState(false);
+const [relationshipStatus,setRelationShipStatus] = useState("");
+const [education,setEducation] = useState("");
+const [relationshipStatusSuccess,setRelationshipStatusSuccess] = useState(false);
+const [educationSuccess,setEducationSuccess] = useState(false);
+const [confirmDelete, setConfirmDelete] = useState(false);
+
+const ContextApp = useContext(AppContext);
+const inputFile = useRef(null);
+const hiddenCoverPhotoInput = useRef(null);
+const hiddenProfilePhotoInput = useRef(null);
+const coverPhotoImage = useRef(null);
+const profilePhotoImage = useRef(null);
+const usernameRef = useRef(null);
+const passwordRef = useRef(null);
+const descriptionRef = useRef(null);
+
+
+
+const handleCoverPhotoInput = (evt)=>{
+  setSuccessCoverImg(false);
+  hiddenCoverPhotoInput.current.click();
+}
+
+const handleProfilePhotoInput = (evt)=>{
+
+  setSuccessProfileImg(false);
+  hiddenProfilePhotoInput.current.click()
+}
+
+const handleUpdateReq = (obj,success)=>
+{
+
+  const userUpdateURL = UPDATE_USER(ContextApp.user.user._id);
+  const token = document.cookie.split(";")[0].split("=")[1];
+  obj.userId = ContextApp.user.user._id;
+
+  axios({
+    url:userUpdateURL,
+    method:'put',
+    data:obj,
+    headers:{
+      'Authorization':`Bearer ${token}`,
+      'Content-Type':'application/json'
+    }
+  }).then(resp=>{
+   console.log(resp);
+   // ContextApp.getUserAndSet();
+   if( resp.status && resp.status == 200)
+   {
+      success(true);
+   }
+   else{
+     alert("Error while updating! Try again later!")
+   }
+  }).catch(err=>{
+    console.log(err);
+    alert("Server Error");
+  })
+}
 
 const handleSetUsername = (txt)=>{
+    setUsernameSuccess(false);
     const val = txt.target.value;
+    if(val.length == 0)
+      setUsernameEmpty(true);
+    else
+      setUsernameEmpty(false);
     setUsername(val);
 }
 
 const handleDescription = (txt)=>{
+  setDescriptionSuccess(false);
   const val = txt.target.value;
   setDescription(val);
 }
 
 const selectCountryFrom = (val)=> {
+  setFromSuccess(false);
   setCountryFrom(val);
 }
 
 const selectRegionFrom = (val)=>{
+  setFromSuccess(false);
   setRegionFrom(val);
 }
 
 const selectCountryLives = (val)=> {
+  setLivesSuccess(false);
   setCountryLives(val);
 }
 
 const selectRegionLives = (val)=>{
+  setLivesSuccess(false);
   setRegionLives(val);
 }
 
@@ -81,39 +151,260 @@ function imageSize(url) {
     return promise;
 }
 
-const uploadImage =(imgData,imgType)=>{
-    const userId = ContextApp.user.user._id;
 
+const handleRepeatPass = (txt)=>{
+  const val = txt.target.value;
+  console.log("Val is:",val);
+  console.log("password is:",password);
+  if(val == password && val!='')
+  {
+    setPassMatch(true);
+  } else {
+    setPassMatch(false);
+  }
 
+   setRepeatPassword(val);
+}
+
+const handlePassword = (txt)=>{
+    const val = txt.target.value;
+    if(val == repeatPassword && val!='')
+    {
+      setPassMatch(true);
+    } else {
+      setPassMatch(false);
+    }
+
+    setPassword(val);
 
 }
 
 const handleCoverImageUpload = async(evt)=>{
+  if(evt.target.files[0]!=undefined)
+  {
+    setCoverPictureErr(false);
+    const file = evt.target.files[0];
+    const renderedData = URL.createObjectURL(file);
+    coverPhotoImage.current.src = renderedData;
+    const imageDimensions = await imageSize(renderedData);
+    const fileReader = new FileReader();
+    fileReader.readAsDataURL(file);
+    fileReader.onload = ev=>{
+      console.log(imageDimensions);
+      if(imageDimensions.width<imageDimensions.height || imageDimensions.width<1000)
+      {
+        setCoverPictureErr(true);
 
-  setCoverPictureErr(false);
-  const file = evt.target.files[0];
-  const renderedData = URL.createObjectURL(file);
-  coverPhotoImage.current.src = renderedData;
-  const imageDimensions = await imageSize(renderedData);
-  const fileReader = new FileReader();
-  fileReader.readAsDataURL(file);
-  fileReader.onload = ev=>{
-    console.log(imageDimensions);
-    console.log()
-    if(imageDimensions.width<=imageDimensions.height || imageDimensions.width<1000)
+      } else{
+        setCoverImageUploaded(true);
+        const obj = {
+          coverPicture:ev.target.result.split("base64,")[1]
+        }
+        setCoverImageObj(obj);
+
+      }
+    }
+  }
+}
+
+const handleUploadImage = (type)=>{
+
+  if(type == "profile")
+  {
+   if(!_.isEmpty(profileImageObj))
+   {
+      handleUpdateReq(profileImageObj,setSuccessProfileImg);
+   }
+
+  } else if(type == "cover"){
+    if(!_.isEmpty(coverImageObj))
     {
-      setCoverPictureErr(true);
+      handleUpdateReq(coverImageObj,setSuccessCoverImg);
+    }
+  }
+}
 
-    } else{
-        uploadImage(ev.target.result.split("base64,")[1],"cover");
+
+const handleProfileImageUpload = async (evt)=>{
+
+  if(evt.target.files[0]!=undefined)
+  {
+    setProfilePictureErr(false);
+    const file = evt.target.files[0];
+    const renderedData = URL.createObjectURL(file);
+    profilePhotoImage.current.src = renderedData;
+    const imageDimensions = await imageSize(renderedData);
+    const fileReader = new FileReader();
+    fileReader.readAsDataURL(file);
+    fileReader.onload = ev=>{
+      if(Math.abs(imageDimensions.width-imageDimensions.height)>=100)
+      {
+        setProfilePictureErr(true);
+
+      } else{
+        setProfileImageUploaded(true);
+        const obj = {
+          profilePicture:ev.target.result.split("base64,")[1]
+        }
+        setProfileImageObj(obj);
+      }
     }
   }
 
 }
 
+const data = ()=>{
+
+}
+
+///handleUpdateReq(obj,success)
+const handlePostData = (type)=>{
+    let obj;
+    if(type=="username")
+    {
+      obj = {
+        username:username
+      }
+      handleUpdateReq(obj,setUsernameSuccess);
+    } else if(type == "password")
+    {
+      obj = {
+        password:password
+      }
+      handleUpdateReq(obj,setPasswordSuccess);
+    } else if (type == "description")
+    {
+      obj = {
+        description:description
+      }
+      handleUpdateReq(obj,setDescriptionSuccess);
+    } else if (type == "from"){
+        if(countryFrom!='' && regionFrom!='')
+        {
+            const countryFromString=regionFrom+','+countryFrom;
+            obj = {
+              from:countryFromString
+            }
+            handleUpdateReq(obj,setFromSuccess);
+        }
+    } else if (type == "livesIn"){
+
+        if(countryLives!='' && regionLives!='')
+        {
+            const countryLivesString=regionLives+','+countryLives;
+            obj = {
+              livesIn:countryLivesString
+            }
+            handleUpdateReq(obj,setLivesSuccess);
+        }
+    } else if (type == "relationship")
+    {
+        obj = {
+          relationship:parseInt(relationshipStatus)
+        }
+        handleUpdateReq(obj,setRelationshipStatusSuccess);
+    } else if (type == "education")
+    {
+        obj = {
+          education:education
+        }
+        handleUpdateReq(obj,setEducationSuccess);
+    }
+}
+
+useEffect(()=>{
+    if(ContextApp.user.user)
+    {
+      let fetchedUser = ContextApp.user.user;
+      setUsername(fetchedUser.username);
+      if(fetchedUser.description && fetchedUser.description!='')
+        setDescription(fetchedUser.description);
+      if(fetchedUser.from && fetchedUser.from!='')
+      {
+        let fromLocationFetched = fetchedUser.from.split(",");
+        setRegionFrom(fromLocationFetched[0]);
+        setCountryFrom(fromLocationFetched[1]);
+      }
+      if(fetchedUser.livesIn && fetchedUser.livesIn!='')
+      {
+        let livesInLocationFetched = fetchedUser.livesIn.split(",");
+        setRegionLives (livesInLocationFetched[0]);
+        setCountryLives (livesInLocationFetched[1]);
+      }
+      if(fetchedUser.relationship)
+      {
+
+         if(fetchedUser.relationship == 1 ||  fetchedUser.relationship == 2 || fetchedUser.relationship == 3  )
+         {
+            switch (fetchedUser.relationship) {
+              case 1:
+                setRelationShipStatus("1");
+                break;
+              case 2:
+                setRelationShipStatus("2");
+                break;
+              case 3:
+                setRelationShipStatus("3");
+                break;
+            }
+         }
+        else
+         {
+           setRelationShipStatus("0");
+         }
+
+      }
+      if(fetchedUser.education && fetchedUser.education!='')
+      {
+        setEducation(fetchedUser.education);
+      }
+    }
+
+},[ContextApp.user.user])
+
+
+const handleRelationShipStatus = (evt)=>{
+      console.log(evt.target.value);
+      setRelationShipStatus(evt.target.value.toString());
+}
+
+const handleEducation = (evt)=>{
+  setEducation(evt.target.value);
+}
+
+const handleDeleteUser = ()=>{
+
+  // const history = useHistory();
+  //
+  //
+  //
+  //  if(document.cookie)
+  //  {
+  //    const refreshTk = document.cookie.split(";")[1].split("=")[1];
+  //    clearCookies();
+  //
+  //    const reqData = {
+  //      token:refreshTk
+  //    }
+  //
+  //    axios({
+  //      method:'delete',
+  //      url:DELETE_TOKEN_URL,
+  //      data:reqData
+  //    }).then(resp=>{
+  //      console.log(resp);
+  //    }).catch(err=>{
+  //      console.log(err);
+  //    });
+  //  }
+  //
+  //
+  // history.push("/");
+}
 
  if(ContextApp.user.user)
  {
+
    return(
      <div className="settings-container">
         <div className="user-settings-header">
@@ -126,18 +417,18 @@ const handleCoverImageUpload = async(evt)=>{
            <img className="profile-background-image user-settings-bkg-img" ref={coverPhotoImage} src={`data:image/jpeg;base64,${ContextApp.user.user.coverPicture}`}  alt="bkg image"/>
             <p className="sub-note"><em>Note:</em> Image width must be greater than image height and width should be greater than 1000px</p>
             {coverPictureErr &&  <p className="img-load-error">Image DOES NOT RESPECT REQUIREMENTS ( SEE NOTE ABOVE)</p>}
-            {successCoverImg && <p className="img-load-success">Image uploaded successfully!</p> }
+            {successCoverImg && <p className="load-success">Image uploaded successfully!</p> }
            <div className="settings-action-container">
 
              <button  onClick={handleCoverPhotoInput} className="browse-img-btn">
                <FontAwesomeIcon icon={faImages}  className="browse-img-icon"/>
                  <span className="browse-btn-text"> Browse </span>
              </button>
-             <input type="file"   accept=".jpg, .jpeg, .png" ref={hiddenCoverPhotoInput} onChange={handleCoverImageUpload} style={{"display":"none"}}/>
-
-             <Button disabled={coverPictureErr} variant="contained" className="btn" color="primary">
+             <input type="file"  accept=".jpg, .jpeg, .png" ref={hiddenCoverPhotoInput} onChange={handleCoverImageUpload} style={{"display":"none"}}/>
+              {coverImageUploaded && <Button disabled={coverPictureErr} onClick={()=>{handleUploadImage("cover")}} variant="contained" className="btn" color="primary">
                Save!
              </Button>
+           }
            </div>
         </div>
 
@@ -147,17 +438,18 @@ const handleCoverImageUpload = async(evt)=>{
           <div className="img-sub-msg">
             <p className="sub-note" style={{marginBottom:"0px"}}><em>Note:</em> Image height and image width must be the same</p>
             {profilePictureErr &&  <p style={{marginBottom:"20px"}} className="img-load-error">Image DOES NOT RESPECT REQUIREMENTS ( SEE NOTE ABOVE)</p>}
-            {successProfileImg && <p className="img-load-success">Image uploaded successfully!</p>}
+            {successProfileImg && <p className="load-success">Image uploaded successfully!</p>}
           </div>
           <div className="settings-action-container user-main-image-btn">
            <button onClick={handleProfilePhotoInput} className="browse-img-btn">
              <FontAwesomeIcon icon={faImages} className="browse-img-icon"/>
               Browse
            </button>
-           <input type="file" ref={hiddenProfilePhotoInput} style={{"display":"none"}}/>
-             <Button  variant="contained" className="btn" color="primary">
+           <input type="file" ref={hiddenProfilePhotoInput} style={{"display":"none"}} onChange={handleProfileImageUpload}/>
+             {profileImageUploaded && <Button disabled={profilePictureErr} onClick={()=>{handleUploadImage("profile")}}  variant="contained" className="btn" color="primary">
                Save!
-             </Button>
+             </Button>}
+
            </div>
         </div>
 
@@ -173,15 +465,51 @@ const handleCoverImageUpload = async(evt)=>{
               rows={2}
               value={username}
               onChange = {handleSetUsername}
+              ref = {usernameRef}
               />
-              <Button variant="contained" className="btn" color="primary">
+              <Button variant="contained" disabled={usernameEmpty} onClick={()=>{handlePostData("username")}} className="btn" color="primary">
                 Change
               </Button>
            </div>
+          {usernameSuccess && <p className="load-success">Username Updated successfully!</p> }
         </div>
 
 
-    
+      <div className="settings-card">
+       <h3>Password</h3>
+         <div className="change-name-input">
+                 <TextField
+                id="standard-password-input"
+                label="Password"
+                style={{width:"80%"}}
+                type="password"
+                autoComplete="current-password"
+                variant="standard"
+                value={password}
+                onChange={handlePassword}
+              />
+              <div style={{marginTop:"50px"}}>
+                 <p className="repeat-pass-title" style={{marginTop:"10px",marginBottom:"20px"}}>Repeat password:</p>
+                    <TextField
+                   id="standard-password-input"
+                   label="Password"
+                   style={{width:"80%"}}
+                   type="password"
+                   autoComplete="current-password"
+                   variant="standard"
+                   value={repeatPassword}
+                   onChange={handleRepeatPass}
+                   />
+              </div>
+
+          <Button disabled={!passMatch} variant="contained" onClick={()=>{handlePostData("password")}} className="btn" color="primary" style={{marginTop:"20px"}}>
+            Change
+          </Button>
+       </div>
+         {passwordSuccess && <p className="load-success">Password updated successfully!</p> }
+    </div>
+
+
 
         <div className="settings-card">
          <h3>Description</h3>
@@ -195,11 +523,16 @@ const handleCoverImageUpload = async(evt)=>{
             rows={2}
             value={description}
             onChange={handleDescription}
-            />
-              <Button variant="contained" className="btn" color="primary">
+            inputProps={
+                {maxLength: 50}
+              }
+           />
+              <Button variant="contained" onClick={()=>{handlePostData("description")}} className="btn" color="primary">
                 Change
               </Button>
            </div>
+             <p className="sub-note" style={{marginBottom:"0px"}}><em>Note:</em> There is a maximum of 50 characters when writing a description!</p>
+           {descriptionSuccess && <p className="load-success">Description updated successfully!</p> }
         </div>
 
         <div className="settings-card">
@@ -212,10 +545,11 @@ const handleCoverImageUpload = async(evt)=>{
              country={countryFrom}
              value={regionFrom}
              onChange={(val) => {selectRegionFrom(val)}} />
-              <Button variant="contained" className="btn btn-left-margin"  color="primary">
+              <Button variant="contained" className="btn btn-left-margin"  onClick = {()=>{handlePostData("from")}} color="primary">
                 Change
               </Button>
            </div>
+             {fromSuccess && <p className="load-success">Account was succesfully updated!</p> }
         </div>
         <div className="settings-card">
          <h3>Lives in</h3>
@@ -227,24 +561,27 @@ const handleCoverImageUpload = async(evt)=>{
              country={countryLives}
              value={regionLives}
              onChange={(val) => selectRegionLives(val)} />
-              <Button variant="contained" className="btn btn-left-margin"  color="primary">
+              <Button variant="contained" onClick = {()=>{handlePostData("livesIn")}} className="btn btn-left-margin"  color="primary">
                 Change
               </Button>
            </div>
+            {livesSuccess && <p className="load-success">Account was succesfully updated!</p> }
         </div>
         <div className="settings-card">
          <h3>Relationship Status</h3>
            <div className="change-name-input">
              <input type="text"/>
-             <select className="settings-select-input" name="relationship-status">
-               <option value="Married">Married</option>
-               <option value="Single">Single</option>
-               <option value="In a relationship">In a relationship</option>
+             <select className="settings-select-input" value={relationshipStatus} onChange={handleRelationShipStatus} name="relationship-status">
+              <option value="0"></option>
+               <option value="1">Married</option>
+               <option value="2">Single</option>
+               <option value="3">In a relationship</option>
              </select>
-              <Button variant="contained" className="btn "  color="primary">
+              <Button variant="contained" className="btn" onClick = {()=>{handlePostData("relationship")}} color="primary">
                 Change
               </Button>
            </div>
+           {relationshipStatusSuccess && <p className="load-success">Account was succesfully updated!</p> }
         </div>
 
         <div className="settings-card">
@@ -257,13 +594,32 @@ const handleCoverImageUpload = async(evt)=>{
             multiline
             style={{width:"80%"}}
             rows={2}
-            value="University"
+            value={education}
+            onChange = {handleEducation}
             />
-              <Button variant="contained" className="btn" color="primary">
+              <Button variant="contained" onClick = {()=>{handlePostData("education")}} className="btn" color="primary">
                 Change
               </Button>
            </div>
+            {educationSuccess && <p className="load-success">Account was succesfully updated!</p> }
         </div>
+
+
+        {!confirmDelete && <Button variant="contained" className="btn" style={{marginBottom:"20px",paddingLeft:"30px",width:'60%'}} onClick={()=>{setConfirmDelete(true)}} color="secondary">
+          DELETE ACCOUNT
+        </Button>}
+     {confirmDelete &&
+       <div className="confirm-delete-container">
+         <h1>Are you sure you want to delete your account?</h1>
+       <Button variant="contained" className="btn" style={{marginBottom:"20px"}} onClick={()=>{setConfirmDelete(false)}} color="secondary">
+         Yes
+       </Button>
+       <Button variant="contained" className="btn" style={{marginBottom:"20px",marginLeft:"30px"}} onClick={()=>{setConfirmDelete(false)}} color="primary">
+         No
+       </Button>
+       </div>
+     }
+
 
      </div>
    )

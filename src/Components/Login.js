@@ -38,6 +38,7 @@ const setCookie = (token,refreshToken)=>{
     let expires = "expires="+d.toUTCString();
     document.cookie = `token=${token}; expires=${expires}`;
     document.cookie = `refreshToken=${refreshToken}; expires=${expires}`;
+    console.log(document.cookie);
 }
 
  const handleLogin = (evt)=>{
@@ -124,7 +125,7 @@ const setCookie = (token,refreshToken)=>{
           { wrongCredentials && <p className="wrong-credentials-header">WRONG CREDENTIALS!</p>}
 					<div className="wrap-input100 validate-input m-b-23" data-validate = "Username is reauired">
 						<span className="label-input100">Email</span>
-						<input className="input100" onChange={handleEmail} value={email} type="text" name="username" placeholder="Type your username"/>
+						<input className="input100" onChange={handleEmail} value={email} type="text" name="username" placeholder="Type your email"/>
 						<span className="focus-input100" data-symbol="&#xf206;"></span>
 					</div>
           {!validEmail && <p className="wrong-credentials" style={{marginBottom:"20px"}}>Email not valid!</p>}

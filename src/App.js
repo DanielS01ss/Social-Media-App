@@ -146,7 +146,8 @@ const App = ()=>{
     reload:reloadhDataAfterRefresh,
     updateUser:updateUser,
     updateToken:updateToken,
-    updateRefreshToken:updateRefreshToken
+    updateRefreshToken:updateRefreshToken,
+    getUserAndSet:getUserAndSet
   }
 
 
@@ -169,7 +170,6 @@ const App = ()=>{
        <Router>
      <AppContext.Provider value={data}>
          <Switch>
-
          <Route exact path='/' component={Home}>
            <Navbar/>
            <Home/>
@@ -188,7 +188,6 @@ const App = ()=>{
            return(
              <Redirect to='/login'/>
            )
-
          }
 
      }}/>
