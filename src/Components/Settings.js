@@ -11,11 +11,15 @@ import { CountryDropdown, RegionDropdown, CountryRegionData } from 'react-countr
 import {AppContext} from "../Context/AppContext";
 import {UPDATE_USER,DELETE_TOKEN_URL} from "../Endpoints/API_ENDPOINTS";
 import axios from "axios";
+import Loading from "./Loading";
+import {isTokenExpired,clearCookies,getStoredTokens} from "../utility-functions/utility-functions";
+import { useHistory } from "react-router-dom";
 
 const _ = require("lodash");
 
 const Settings = ()=>{
 
+const history = useHistory();
 const [countryFrom,setCountryFrom] = useState("");
 const [regionFrom,setRegionFrom] = useState("");
 const [countryLives,setCountryLives] = useState("");
@@ -71,32 +75,54 @@ const handleProfilePhotoInput = (evt)=>{
 const handleUpdateReq = (obj,success)=>
 {
 
-  const userUpdateURL = UPDATE_USER(ContextApp.user.user._id);
-  const token = document.cookie.split(";")[0].split("=")[1];
-  obj.userId = ContextApp.user.user._id;
+  const userUpdateURL = UPDATE_USER(ContextApp.user._id);
+  const {token} = getStoredTokens();
+  obj.userId = ContextApp.user._id;
 
-  axios({
-    url:userUpdateURL,
-    method:'put',
-    data:obj,
-    headers:{
-      'Authorization':`Bearer ${token}`,
-      'Content-Type':'application/json'
-    }
-  }).then(resp=>{
-   console.log(resp);
-   // ContextApp.getUserAndSet();
-   if( resp.status && resp.status == 200)
-   {
-      success(true);
-   }
-   else{
-     alert("Error while updating! Try again later!")
-   }
-  }).catch(err=>{
-    console.log(err);
-    alert("Server Error");
-  })
+
+ if(token != '')
+ {
+     axios({
+       url:userUpdateURL,
+       method:'put',
+       data:obj,
+       headers:{
+         'Authorization':`Bearer ${token}`,
+         'Content-Type':'application/json'
+       }
+     }).then(resp=>{
+      console.log(resp);
+
+      if( resp.status && resp.status == 200)
+      {
+         success(true);
+         const newUser = ContextApp.user;
+         newUser[Object.keys(obj)[0]] = obj[Object.keys(obj)[0]];
+         ContextApp.setUser(newUser);
+      }
+      else{
+        if(isTokenExpired(token))
+        {
+          ContextApp.refreshToken(token);
+          return;
+        }
+        alert("Error while updating! Try again later!")
+      }
+     }).catch(err=>{
+       if(isTokenExpired(token))
+       {
+         console.log('Token was expired!');
+         ContextApp.refreshToken(token);
+         return;
+       }
+       console.log(err);
+       alert("Server Error");
+     })
+ } else {
+    clearCookies();
+    history.push('/');
+ }
+
 }
 
 const handleSetUsername = (txt)=>{
@@ -257,7 +283,6 @@ const data = ()=>{
 
 }
 
-///handleUpdateReq(obj,success)
 const handlePostData = (type)=>{
     let obj;
     if(type=="username")
@@ -265,7 +290,7 @@ const handlePostData = (type)=>{
       obj = {
         username:username
       }
-      handleUpdateReq(obj,setUsernameSuccess);
+    handleUpdateReq(obj,setUsernameSuccess)
     } else if(type == "password")
     {
       obj = {
@@ -313,9 +338,9 @@ const handlePostData = (type)=>{
 }
 
 useEffect(()=>{
-    if(ContextApp.user.user)
+    if(ContextApp.user)
     {
-      let fetchedUser = ContextApp.user.user;
+      let fetchedUser = ContextApp.user;
       setUsername(fetchedUser.username);
       if(fetchedUser.description && fetchedUser.description!='')
         setDescription(fetchedUser.description);
@@ -360,7 +385,7 @@ useEffect(()=>{
       }
     }
 
-},[ContextApp.user.user])
+},[ContextApp.user])
 
 
 const handleRelationShipStatus = (evt)=>{
@@ -402,9 +427,9 @@ const handleDeleteUser = ()=>{
   // history.push("/");
 }
 
- if(ContextApp.user.user)
+ if(ContextApp.user)
  {
-
+   console.log("Now I was fetched!");
    return(
      <div className="settings-container">
         <div className="user-settings-header">
@@ -414,7 +439,7 @@ const handleDeleteUser = ()=>{
 
         <div className="settings-card">
           <h3>Cover Image</h3>
-           <img className="profile-background-image user-settings-bkg-img" ref={coverPhotoImage} src={`data:image/jpeg;base64,${ContextApp.user.user.coverPicture}`}  alt="bkg image"/>
+           <img className="profile-background-image user-settings-bkg-img" ref={coverPhotoImage} src={`data:image/jpeg;base64,${ContextApp.user.coverPicture}`}  alt="bkg image"/>
             <p className="sub-note"><em>Note:</em> Image width must be greater than image height and width should be greater than 1000px</p>
             {coverPictureErr &&  <p className="img-load-error">Image DOES NOT RESPECT REQUIREMENTS ( SEE NOTE ABOVE)</p>}
             {successCoverImg && <p className="load-success">Image uploaded successfully!</p> }
@@ -434,7 +459,7 @@ const handleDeleteUser = ()=>{
 
         <div className="settings-card">
           <h3>Profile Image</h3>
-         <img className="person-avatar-profile user-settings-person-main-photo" ref={profilePhotoImage} src={`data:image/jpeg;base64,${ContextApp.user.user.profilePicture}`}/>
+         <img className="person-avatar-profile user-settings-person-main-photo" ref={profilePhotoImage} src={`data:image/jpeg;base64,${ContextApp.user.profilePicture}`}/>
           <div className="img-sub-msg">
             <p className="sub-note" style={{marginBottom:"0px"}}><em>Note:</em> Image height and image width must be the same</p>
             {profilePictureErr &&  <p style={{marginBottom:"20px"}} className="img-load-error">Image DOES NOT RESPECT REQUIREMENTS ( SEE NOTE ABOVE)</p>}
@@ -625,7 +650,7 @@ const handleDeleteUser = ()=>{
    )
 
  } else {
-   return (<div></div>);
+   return (<Loading/>);
  }
 
 

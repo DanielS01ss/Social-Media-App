@@ -54,16 +54,16 @@ const Profile = () =>{
 
   },[ContextAppData.user])
 
- if(ContextAppData.user.user)
+ if(ContextAppData.user)
  {
    return(
      <div>
        <div className="main-content-profile" >
          <div className="profile-data-container" >
-           <img className="profile-background-image"  src={`data:image/jpeg;base64,${ContextAppData.user.user.coverPicture}`} alt="bkg image"/>
-           <img className="person-avatar-profile" src={`data:image/jpeg;base64,${ContextAppData.user.user.profilePicture}`} />
-           <p className="username">{ContextAppData.user.user.username}</p>
-           <p className="user-desc">{ContextAppData.user.user.description}</p>
+           <img className="profile-background-image"  src={`data:image/jpeg;base64,${ContextAppData.user.coverPicture}`} alt="bkg image"/>
+           <img className="person-avatar-profile" src={`data:image/jpeg;base64,${ContextAppData.user.profilePicture}`} />
+           <p className="username">{ContextAppData.user.username}</p>
+           <p className="user-desc">{ContextAppData.user.description}</p>
            <div className="user-contact">
              <p className="user-contact-action">
              <FontAwesomeIcon icon = {faUserPlus} className = "user-action-icon"/>
@@ -78,12 +78,12 @@ const Profile = () =>{
         <div className="user-heading-container">
             <div className="profile-info">
               <p className="profile-info-title">User Description</p>
-              <p className="profile-info-item"> <FontAwesomeIcon icon={faHome} className="profile-description-icon"/>From:</p><span>{ContextAppData.user.user.from}</span>
-              <p className="profile-info-item"><FontAwesomeIcon icon={faCity} className="profile-description-icon"/>Lives in:</p><span>{ContextAppData.user.user.livesIn}</span>
+              <p className="profile-info-item"> <FontAwesomeIcon icon={faHome} className="profile-description-icon"/>From:</p><span>{ContextAppData.user.from}</span>
+              <p className="profile-info-item"><FontAwesomeIcon icon={faCity} className="profile-description-icon"/>Lives in:</p><span>{ContextAppData.user.livesIn}</span>
               <p className="profile-info-item"><FontAwesomeIcon icon={faHeart} className="profile-description-icon"/>Relationship Status:</p>
               {
                 (() => {
-                  switch (ContextAppData.user.user.relationship) {
+                  switch (ContextAppData.user.relationship) {
                     case 1:
                       return (<span>Single</span>);
                       break;
@@ -99,12 +99,12 @@ const Profile = () =>{
                 })()
 
               }
-              <p className="profile-info-item"><FontAwesomeIcon icon={faGraduationCap} className="profile-description-icon"/>Studied at:</p><span>{ContextAppData.user.user.education}</span>
+              <p className="profile-info-item"><FontAwesomeIcon icon={faGraduationCap} className="profile-description-icon"/>Studied at:</p><span>{ContextAppData.user.education}</span>
             </div>
             <div className="profile-submit-post">
              <div className="profile-form-container">
                <div className="person-avatar-container">
-                 <img src={`data:image/jpeg;base64,${ContextAppData.user.user.profilePicture}`} alt="person" className="person-avatar"/>
+                 <img src={`data:image/jpeg;base64,${ContextAppData.user.profilePicture}`} alt="person" className="person-avatar"/>
                </div>
                   <form className={`${classes.root} text-input`} noValidate autoComplete="off">
                   <TextField
@@ -143,8 +143,8 @@ const Profile = () =>{
 
             <div className="profile-post-container">
               <div className="header">
-                  <img src={`data:image/jpeg;base64,${ContextAppData.user.user.profilePicture}`} className="person-avatar-online"/>
-                  <p className="post-username">{ContextAppData.user.user.username}</p>
+                  <img src={`data:image/jpeg;base64,${ContextAppData.user.profilePicture}`} className="person-avatar-online"/>
+                  <p className="post-username">{ContextAppData.user.username}</p>
                  </div>
                  <div className="post-body">
                    <p className="description">Lorem ipsum dolor sit amet, copiosae percipit temporibus cu sit. An clita causae deleniti mea, te etiam ocurreret nec, te mel aliquam omittam. Nisl laoreet invenire eam ne, cu noster semper blandit his. Ius in essent complectitur, prompta facilisi electram mel eu, mea eu eripuit ceteros definiebas. Usu ne causae delectus intellegat.

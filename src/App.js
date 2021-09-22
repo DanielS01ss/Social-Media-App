@@ -20,10 +20,13 @@ import {AppContext} from "./Context/AppContext";
 import React , {useContext,useEffect, useState} from "react";
 import { Redirect } from "react-router-dom";
 import axios from "axios";
-import {CHECK_TOKEN_URL,GET_USER_URL} from "./Endpoints/API_ENDPOINTS";
+import {CHECK_TOKEN_URL,GET_USER_URL,REFRESH_TOKEN_URL} from "./Endpoints/API_ENDPOINTS";
 import { useHistory } from "react-router-dom";
 import {useSetLoggedInTrue} from "./utility-functions/useSetLogin";
 import jwt_decode from "jwt-decode";
+import {clearCookies,isTokenExpired,getStoredTokens,setCookie} from "./utility-functions/utility-functions.js";
+
+const _ = require("lodash");
 
 const UserRoutePages = ()=>{
   return(
@@ -35,106 +38,189 @@ const UserRoutePages = ()=>{
      <Route exact path="/user/settings" component={Settings}/>
      <Route exact path="*" component={PageNotFound}/>
    </Switch>
-
   )
 }
 
+const AuthenticatedRoute = (props)=>{
+  console.log(props);
+  if(props.loggedIn)
+  {
+    return(
+      <>
+       <FeedNavbar key="data"/>
+       <UserRoutePages/>
+       </>)
+  } else {
+
+    return(
+      <Redirect to='/login'/>
+    )
+  }
+}
+
+
 const App = ()=>{
 
-    const getUserAndSet = (myToken)=>{
-      const data = {
-        token : myToken
-      }
-
-      axios.post(GET_USER_URL, {"body":data}, {
-       headers: {
-       'Content-Type': 'application/json',
-       'Authorization':'Bearer '+myToken
-       }
-     }
-   ).then(resp=>{
-
-     if(resp.data != null)
-     {
-       setTimeout(()=>{
-         setIsLoading(false);
-         setUser(resp.data);
-       },1000);
-     } else {
-       setTimeout(()=>{
-         setIsLoading(false);
-         setLoggedIn(false);
-       },1000);
-     }
-
-   }).catch(err=>{
-     console.log(err);
-     setTimeout(()=>{
-         setIsLoading(false);
-         setLoggedIn(false);
-     },1000);
-   })
-  }
+const [loggedIn, setLoggedIn] = useState(false);
+let [user,setUser] = useState({});
+const [isLoading, setIsLoading] = useState(true);
 
 
-  const reloadhDataAfterRefresh = ()=>{
-    const myToken = document.cookie.split(";")[0].split("=")[1];
-    if(myToken)
-    {
+const  setCookie = (cName, cValue, expDays)=> {
+        let date = new Date();
+        date.setTime(date.getTime() + (expDays * 24 * 60 * 60 * 1000));
+        const expires = "expires=" + date.toUTCString();
+        document.cookie = cName + "=" + cValue + "; " + expires + "; path=/";
+}
 
-      fetch(CHECK_TOKEN_URL,{
-          method:"POST",
-          headers: {"Content-type": "application/json;charset=UTF-8"},
-          body:JSON.stringify({
-            token:myToken
-          })
-      }).then(resp=>{
+const updateUserProperty = (userObj)=>{
+  setUser(userObj);
+}
 
-        console.log("hello");
-        if(resp.status == 200){
-          setLoggedIn(true);
-          getUserAndSet(myToken);
-
-        } else{
-          setTimeout(()=>{
-              setIsLoading(false);
-              setLoggedIn(false);
-          },1000);
+const refreshTokenFunc = ()=>{
+  console.log("Refresh token function was called!");
+  setIsLoading(true);
+  let {refreshToken} = getStoredTokens();
+  if(refreshToken != '')
+  {
+     axios.post(REFRESH_TOKEN_URL,{
+        token:refreshToken
         }
-        console.log("Hello from response:",resp);
-      }).catch(err=>{
-        console.log("Hello from catch statement");
-        console.log(err);
-            setTimeout(()=>{
-                setIsLoading(false);
-                setLoggedIn(false);
-            },1000);
-          });
-    } else {
+   ).then(resp=>{
+       if(resp.status == 200)
+       {
+         const d = new Date();
+         d.setTime(d.getTime()+1*60*60*60*1000);
+         let expires = "expires="+d.toUTCString();
+         const newToken = resp.data.token;
+         setLoggedIn(true);
+         setCookie('token',newToken,1);
+         getUserAndSet(newToken);
+       } else{
+         clearCookies();
+         setLoggedIn(false);
+         setIsLoading(false);
+       }
+     }).catch(err=>{
+       console.log(err);
+      clearCookies();
+      setLoggedIn(false);
       setTimeout(()=>{
-          setIsLoading(false);
-          setLoggedIn(false);
-      },1000);
-    }
+        setIsLoading(false);
+      },500);
+     })
+  } else {
+    clearCookies();
+    setLoggedIn(false);
+    setTimeout(()=>{
+      setIsLoading(false);
+    },500);
+  }
+}
+
+
+const getUserAndSet = (myToken)=>{
+  const data = {
+    token : myToken
   }
 
+axios({
+  url:GET_USER_URL,
+  method:'post',
+  headers:{
+    'Content-Type': 'application/json',
+    'Authorization':'Bearer '+myToken
+  },
+  data:data
+}).then(resp=>{
+  console.log(resp);
+  if(resp.status == 200)
+  {
+    setUser(resp.data.user);
+    setLoggedIn(true);
+    setTimeout(()=>{
+      setIsLoading(false);
+    },2000);
+  }
+}).catch(err=>{
+  console.log(err);
+  setTimeout(()=>{
+    setLoggedIn(true);
+    setIsLoading(false);
+  },1000);
+})
+
+}
+
+const reloadDataAfterRefresh = ()=>{
+
+    let {token,refreshToken} = getStoredTokens();
+    token = token.trim();
+    refreshToken = refreshToken.trim();
+
+   if(token != '' && refreshToken != '')
+   {
+
+     fetch(CHECK_TOKEN_URL,{
+         method:"POST",
+         headers: {"Content-type": "application/json;charset=UTF-8"},
+         body:JSON.stringify({
+          token:token
+         })
+     }).then(resp=>{
+
+       if(resp.status == 200)
+       {
+         getUserAndSet(token);
+
+       } else {
+         if(isTokenExpired(token))
+         {
+           refreshTokenFunc();
+           return;
+         }
+         clearCookies();
+         setTimeout(()=>{
+           setLoggedIn(false);
+           setIsLoading(false);
+         },500);
+       }
+
+      }).catch(err=>{
+        if(isTokenExpired(token))
+        {
+          refreshTokenFunc();
+          return;
+        }
+         console.log(err);
+         clearCookies();
+         setLoggedIn(false);
+         setTimeout(()=>{
+           setIsLoading(false);
+         },500);
+      });
+   } else {
+     clearCookies();
+     setLoggedIn(false);
+     setTimeout(()=>{
+       setIsLoading(false);
+     },500);
+   }
+}
 
 
-  const updateUser = (user)=>{
+const updateUser = (user)=>{
     setUser(user);
-  }
+}
 
-  const updateToken = (tk)=>{
+const updateToken = (tk)=>{
     data.token = tk;
-  }
+}
 
   const updateRefreshToken = (tk)=>{
     data.refreshToken = tk;
   }
 
-  const [loggedIn, setLoggedIn] = useState(false);
-  let [user,setUser] = useState({});
-  const [isLoading, setIsLoading] = useState(true);
   const data = {
     user:user,
     setUser:setUser,
@@ -143,20 +229,18 @@ const App = ()=>{
     setLoggedIn:setLoggedIn,
     setIsLoading:setIsLoading,
     isLoading:isLoading,
-    reload:reloadhDataAfterRefresh,
+    reload:reloadDataAfterRefresh,
     updateUser:updateUser,
     updateToken:updateToken,
     updateRefreshToken:updateRefreshToken,
-    getUserAndSet:getUserAndSet
+    getUserAndSet:getUserAndSet,
+    refreshToken:refreshTokenFunc,
+    updateUserProperty:updateUserProperty
   }
 
-
-
-  useEffect(()=>{
-    reloadhDataAfterRefresh();
-
-},[]);
-
+useEffect(()=>{
+    reloadDataAfterRefresh();
+  },[]);
 
 
  if(isLoading)
@@ -167,31 +251,16 @@ const App = ()=>{
  } else {
    return (
      <div>
-       <Router>
+     <Router>
      <AppContext.Provider value={data}>
          <Switch>
          <Route exact path='/' component={Home}>
            <Navbar/>
            <Home/>
          </Route>
-
-     <Route path="/user" key="data" render ={()=>{
-         if(loggedIn)
-         {
-           return(
-             <>
-             <FeedNavbar key="data"/>
-             <UserRoutePages/>
-             </>
-           )
-         } else {
-           return(
-             <Redirect to='/login'/>
-           )
-         }
-
-     }}/>
-
+     <Route path="/user" key="data">
+         <AuthenticatedRoute loggedIn={loggedIn} />
+     </Route>
        <Route exact path = "/register-success" component={Success}/>
        <Route exact path='/login' component={Login} >
        </Route>
@@ -203,65 +272,10 @@ const App = ()=>{
        </Switch>
        </AppContext.Provider>
        </Router>
-
      </div>
    )
  }
 
- //
- // if(isLoading)
- // {
- //   return(
- //     <Loading/>
- //   )
- // } else {
- //   return (
- //     <div>
- //       <Router>
- //     <AppContext.Provider value={data}>
- //         <Switch>
- //         <Route exact path='/' component={Home}>
- //           <Navbar/>
- //           <Home/>
- //         </Route>
- //
- //     <Route path="/user" key="data" render ={()=>{
- //         if(loggedIn)
- //         {
- //           return(
- //             <>
- //             <FeedNavbar key="data"/>
- //             <UserRoutePages/>
- //             </>
- //           )
- //         } else {
- //           return(
- //             <Redirect to='/login'/>
- //           )
- //         }
- //
- //     }}/>
- //
- //       <Route exact path = "/register-success" component={Success}/>
- //       <Route exact path='/login' component={Login} >
- //       </Route>
- //       <Route path='/signup' component={SignUp}>
- //       </Route>
- //       <Route path='/about' component={About}>
- //       </Route>
- //       <Route component={PageNotFound}/>
- //       </Switch>
- //       </AppContext.Provider>
- //       </Router>
- //
- //     </div>
- //   )
- // }
- return(
-   <div>
-    <p>Hello</p>
-   </div>
- )
 }
 
 export default App;
