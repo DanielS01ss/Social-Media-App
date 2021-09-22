@@ -30,15 +30,13 @@ const ContextApp = useContext(AppContext);
    }
 }
 
-
-
 const setCookie = (token,refreshToken)=>{
     const d = new Date();
     d.setTime(d.getTime()+1*60*60*1000);
     let expires = "expires="+d.toUTCString();
     document.cookie = `token=${token}; expires=${expires}`;
     document.cookie = `refreshToken=${refreshToken}; expires=${expires}`;
-    console.log(document.cookie);
+
 }
 
  const handleLogin = (evt)=>{
@@ -52,7 +50,6 @@ const setCookie = (token,refreshToken)=>{
       if(resp.status == 200)
       {
           setCookie(resp.data.token,resp.data.refreshToken);
-
           ContextApp.updateUser(resp.data.user);
           ContextApp.updateToken(resp.data.token);
           ContextApp.updateRefreshToken(resp.data.refreshToken);

@@ -42,7 +42,7 @@ import axios from "axios";
 import {DELETE_TOKEN_URL} from "../Endpoints/API_ENDPOINTS.js";
 import {AppContext} from "../Context/AppContext";
 import {useHistory} from "react-router-dom";
-import {clearCookies} from "../utility-functions/utility-functions.js";
+import {clearCookies,getStoredTokens} from "../utility-functions/utility-functions.js";
 import Loading from '../Components/Loading.js';
 
 
@@ -128,35 +128,26 @@ export default function PrimarySearchAppBar() {
  };
 
  const history = useHistory();
+ const AppContextData = useContext(AppContext);
  const handleLogout = ()=>{
-
-
+   console.log("Hello from handle logout")
+   clearCookies();
   if(document.cookie)
   {
-    const refreshTk = document.cookie.split(";")[1].split("=")[1];
+    const refreshTk = getStoredTokens().refreshToken;
     clearCookies();
-    // AppContextData.setLoggedIn(false);
-    // AppContextData.setIsLoading(true);
-
     const reqData = {
       token:refreshTk
     }
-
-    axios({
-      method:'delete',
-      url:DELETE_TOKEN_URL,
-      data:reqData
-    }).then(resp=>{
-      console.log(resp);
-    }).catch(err=>{
-      console.log(err);
-    });
   }
   else {
     console.log("No cookies today!");
     }
 
-      history.push("/");
+    history.push('/')
+    setTimeout(()=>{
+        window.location.reload();
+    },2000);
  }
 
 
@@ -175,8 +166,6 @@ export default function PrimarySearchAppBar() {
  };
 
  const handleNotificationsMenu = ()=>{
-    ///for mobile menu we have : handleMobileMenuClose -<< it is the actual function name
-    ///under 960px we have the menu for mobile rendered
     if(window.innerWidth<960)
     {
       handleMobileMenuClose();
@@ -210,6 +199,7 @@ export default function PrimarySearchAppBar() {
    </Menu>
  );
 
+const [profileImg,setProfileImg] = useState("");
  const mobileMenuId = 'primary-search-account-menu-mobile';
  const renderMobileMenu = (
    <Menu
@@ -244,16 +234,14 @@ export default function PrimarySearchAppBar() {
          aria-haspopup="true"
          color="inherit"
        >
-         <img src={Person} className="person-icon-nav"/>
+         <img src={`data:image/jpeg;base64,${profileImg}`} className="person-icon-nav"/>
        </IconButton>
        <p>Profile</p>
      </MenuItem>
    </Menu>
  );
 
-
   const [open, setOpen] = useState(false);
-
   const toggleDrawer = ()=>{
     setOpen(!open);
   }
@@ -269,12 +257,10 @@ export default function PrimarySearchAppBar() {
   const [renderNotifications, setRenderNotifications] = useState(false);
   const [renderMessages,setRenderMessages] = useState(false);
   const [renderHomeBtn,setRenderHomeBtn] = useState(false);
-   const AppContextData = useContext(AppContext);
+
 
   useEffect(()=>{
 
-
-    AppContextData.reload();
     window.addEventListener("resize",handleDrawerAtResize);
     if(window.location.pathname == "/user/profile")
     {
@@ -283,24 +269,20 @@ export default function PrimarySearchAppBar() {
       setRenderHamMenu(true);
     }
 
-    if(window.location.pathname != "/user/feed")
-    {
-      setRenderHomeBtn(true);
-    } else {
-      setRenderHamMenu(false);
-    }
-
     if(AppContextData.user){
       setIsLoading(false);
-    }
 
+    }
+    if(AppContextData.user.user){
+      setProfileImg(AppContextData.user.user.profilePicture);
+    }
     return ()=>{
       window.removeEventListener("resize",handleDrawerAtResize);
     }
-  },[])
+  },[AppContextData.user.user])
 
 
-if(AppContextData.user.user){
+if(AppContextData.user){
  return (
    <div className={classes.grow}>
 
@@ -367,7 +349,7 @@ if(AppContextData.user.user){
              onClick={handleProfileMenuOpen}
              color="inherit"
            >
-           <img src={`data:image/jpeg;base64,${AppContextData.user.user.profilePicture}`} className="person-icon-nav"/>
+           <img src={`data:image/jpeg;base64,${AppContextData.user.profilePicture}`} className="person-icon-nav"/>
            </IconButton>
          </div>
          <div className={classes.sectionMobile}>
@@ -385,7 +367,6 @@ if(AppContextData.user.user){
      </AppBar>
      {renderMobileMenu}
      {renderMenu}
-
     {
       renderNotifications &&
       <div className="navbar-dropdown">
@@ -429,7 +410,6 @@ if(AppContextData.user.user){
        </div>
 
      </div>
-
    </div>
  ) }
  else {

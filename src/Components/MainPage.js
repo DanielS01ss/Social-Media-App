@@ -63,23 +63,25 @@ const [isLoadingData,setIsLoadingData] = useState(true);
 let user;
 
 useEffect(()=>{
+    console.log("MainPage first useEffect is called at refresh!");
     window.addEventListener('resize',resFunc);
     // ContextApp.reload();
     // user = ContextApp.user.user;
-
     if(ContextApp.user){
       setIsLoadingData(false);
     }
     return()=>{
       window.removeEventListener('resize',resFunc);
     }
-},[]);
+},[ContextApp.user]);
 
-  if(ContextApp.user.user)
+
+
+if(ContextApp.user)
   {
+
     return(
       <div className="main-container">
-
       <div className="side-nav options">
      <div className="item-container item-large">
        <FontAwesomeIcon icon={faCommentDots} className="icon-container"/>
@@ -98,7 +100,7 @@ useEffect(()=>{
   <div className="post-card">
    <div className="form-container">
    <div className="person-avatar-container">
-     <img src={`data:image/jpeg;base64,${ContextApp.user.user.profilePicture}`} alt="person" className="person-avatar"/>
+     <img src={`data:image/jpeg;base64,${ContextApp.user.profilePicture}`} alt="person" className="person-avatar"/>
    </div>
       <form className={`${classes.root} text-input`} noValidate autoComplete="off">
       <TextField
@@ -188,7 +190,7 @@ useEffect(()=>{
    </div>
 
    <div className="post-container">
-      <img src={`data:image/jpeg;base64,${ContextApp.user.user.profilePicture}`} className="person-avatar-online"/>
+      <img src={`data:image/jpeg;base64,${ContextApp.user.profilePicture}`} className="person-avatar-online"/>
    </div>
   </div>
   <div className="right-nav">
