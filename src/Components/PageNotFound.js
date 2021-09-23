@@ -6,7 +6,7 @@ const PageNotFound = ()=>{
 
   return(
     <div  className="not-found">
-      <img src={Image} style={{width:"100vw"}} />
+      <img src={Image} style={{width:"90vw"}} />
     </div>
   )
 

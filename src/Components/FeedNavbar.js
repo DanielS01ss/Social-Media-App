@@ -193,7 +193,7 @@ export default function PrimarySearchAppBar() {
      open={isMenuOpen}
      onClose={handleMenuClose}
    >
-     <MenuItem onClick={handleMenuClose} name="Profile"><FontAwesomeIcon icon={faUser} style={{marginRight:"10"}}/> <Link style={{textDecoration:"none",color:"#000"}} to="/user/profile"> Profile</Link></MenuItem>
+     <MenuItem onClick={handleMenuClose} name="Profile"><FontAwesomeIcon icon={faUser} style={{marginRight:"10"}}/> <Link style={{textDecoration:"none",color:"#000"}} to={'/user/profile?id='+AppContextData.user._id}> Profile</Link></MenuItem>
      <MenuItem onClick={handleMenuClose} name="Settings"><FontAwesomeIcon icon={faCog} style={{marginRight:"10"}}/> <Link style={{textDecoration:"none",color:"#000"}} to="/user/settings"> Settings </Link></MenuItem>
      <MenuItem onClick={handleMenuClose} name="Logout" onClick={handleLogout}><FontAwesomeIcon icon={faDoorOpen} style={{marginRight:"10"}}/> Logout </MenuItem>
    </Menu>
@@ -274,7 +274,7 @@ const [profileImg,setProfileImg] = useState("");
 
     }
     if(AppContextData.user.user){
-      setProfileImg(AppContextData.user.user.profilePicture);
+      setProfileImg(AppContextData.user.profilePicture);
     }
     return ()=>{
       window.removeEventListener("resize",handleDrawerAtResize);

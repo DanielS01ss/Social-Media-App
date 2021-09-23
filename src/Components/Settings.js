@@ -362,6 +362,9 @@ useEffect(()=>{
          if(fetchedUser.relationship == 1 ||  fetchedUser.relationship == 2 || fetchedUser.relationship == 3  )
          {
             switch (fetchedUser.relationship) {
+              case 0:
+                setRelationShipStatus("0");
+                break;
               case 1:
                 setRelationShipStatus("1");
                 break;

@@ -32,10 +32,10 @@ const UserRoutePages = ()=>{
   return(
    <Switch>
      <Route exact path="/user/messages" component={Messages}/>
-     <Route exact path="/user/profile" component={Profile}/>
      <Route exact path='/user/feed' component={MainPage}/>
      <Route exact path="/user/questions" component={Questions}/>
      <Route exact path="/user/settings" component={Settings}/>
+     <Route path="/user/profile" component={Profile}/>
      <Route exact path="*" component={PageNotFound}/>
    </Switch>
   )
