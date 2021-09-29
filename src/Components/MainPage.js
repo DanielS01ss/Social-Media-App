@@ -1,4 +1,4 @@
-import React ,{useEffect,useState,useContext} from "react";
+import React ,{useEffect,useState,useContext,useRef} from "react";
 import "../Styles/mainPage.css";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {faCommentDots}  from '@fortawesome/free-solid-svg-icons';
@@ -25,6 +25,10 @@ import Post from "../images/dummy-post.jpg";
 import { Link } from "react-router-dom";
 import {AppContext} from "../Context/AppContext";
 import Loading from '../Components/Loading.js';
+import {getStoredTokens} from "../utility-functions/utility-functions";
+import axios from "axios";
+import Loader from "../images/loader.gif";
+import {POST} from "../Endpoints/API_ENDPOINTS";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -41,6 +45,16 @@ const classes = useStyles();
 const [value, setValue] = React.useState('Controlled');
 const [toggleComments, setToggleComments] = useState(false);
 const [liked,setLiked] = useState(false);
+const textRef = useRef(null);
+const imgRef = useRef(null);
+const imgInput = useRef(null);
+const [imageUploaded,setImageUploaded] = useState(false);
+const [imageToUpload,setImageToUpload] = useState({});
+const [postText,setPostText] = useState("");
+const [postDisabled,setPostDisabled] = useState(true);
+const [postIsUploading,setPostIsUploading] = useState(false);
+const [postError,setPostError] = useState(false);
+const [posts,setPosts] = useState([])
 
 const handleChange = (event) => {
  setValue(event.target.value);
@@ -58,18 +72,119 @@ const handleLike = ()=>{
   setLiked(!liked);
 }
 
+const imgUploadProcess = (evt)=>{
+  if(evt.target.files[0]!=undefined)
+  {
+    const file = evt.target.files[0];
+    const renderedData = URL.createObjectURL(file);
+    const fileReader = new FileReader();
+    fileReader.readAsDataURL(file);
+    setImageUploaded(true);
+    fileReader.onload = ev =>{
+      const obj = {
+        coverPicture:ev.target.result.split("base64,")[1]
+      }
+      setImageToUpload(obj);
+      console.log(obj);
+    }
+  }
+
+}
+
+const handlePhotoUpload = (evt)=>{
+  setImageUploaded(false);
+  evt.preventDefault();
+  imgInput.current.click()
+}
+
+
+const postData = ()=>{
+  setImageUploaded(false);
+  setPostIsUploading(true);
+  const {token} = getStoredTokens();
+  axios({
+    url:POST,
+    method:'post',
+    headers:{
+      'Authorization':`Bearer ${token}`
+    },
+    data:{
+      description:postText,
+      postPicture:imageToUpload.coverPicture
+    }
+  }).then(resp=>{
+    console.log(resp);
+    if(resp.status == 200)
+    {
+      setPostIsUploading(false);
+      let postObj = {
+        comments:[],
+        desc:postText,
+        img:imageToUpload.coverPicture,
+        likes:[],
+        postHolder:ContextApp.user,
+        userId:ContextApp.user._id
+      }
+      let oldElems;
+      setPosts(oldArr => [postObj,...oldArr]);
+      setImageToUpload("");
+      setPostText("");
+    }
+    else{
+      console.log("Hello from else!");
+      setPostIsUploading(false);
+      alert("Error while posting!");
+    }
+  }).catch(err=>{
+    console.log(err);
+    setPostIsUploading(false);
+    alert("Error while posting!");
+  })
+
+
+}
+
+const handlePostText = (evt)=>{
+  const text = evt.target.value;
+  setPostText(text);
+  if(text.length>0)
+  {
+    setPostDisabled(false);
+  } else {
+    setPostDisabled(true);
+  }
+
+}
+
+
+const getData = ()=>{
+  const {token} = getStoredTokens();
+  axios({
+    url:'http://localhost:8000/api/posts/getposts',
+    method:'post',
+    headers:{
+      'Authorization':`Bearer ${token}`
+    }
+  }).then(resp=>{
+    console.log(resp);
+  }).catch(err=>{
+    console.log(err);
+  })
+}
+
 const ContextApp = useContext(AppContext);
 const [isLoadingData,setIsLoadingData] = useState(true);
 let user;
 
+
 useEffect(()=>{
     console.log("MainPage first useEffect is called at refresh!");
     window.addEventListener('resize',resFunc);
-    // ContextApp.reload();
-    // user = ContextApp.user.user;
+
     if(ContextApp.user){
       setIsLoadingData(false);
     }
+
     return()=>{
       window.removeEventListener('resize',resFunc);
     }
@@ -78,7 +193,7 @@ useEffect(()=>{
 
 
 if(ContextApp.user)
-  {
+ {
 
     return(
       <div className="main-container">
@@ -104,29 +219,25 @@ if(ContextApp.user)
    </div>
       <form className={`${classes.root} text-input`} noValidate autoComplete="off">
       <TextField
-   id="outlined-multiline-static"
-   label="What is on your mind?"
-   multiline
-   style={{width:"80%"}}
-   rows={2}
-   defaultValue=""
+         id="outlined-multiline-static"
+         label="What is on your mind?"
+         multiline
+         style={{width:"80%"}}
+         rows={2}
+         defaultValue=""
+         ref={textRef}
+         onChange={handlePostText}
     />
+
+   {imageUploaded && <p className="success-img">Image Uploaded!</p>}
     <div className="media-type-container">
-      <div className="media-type">
+    <input type="file" hidden={true}  accept=".jpg, .jpeg, .png" ref={imgInput} onChange={imgUploadProcess}/>
+      <button onClick={handlePhotoUpload} className="media-type">
           <FontAwesomeIcon icon={faPhotoVideo} className="icon-container photo-video"/>
-          <p className="media-icon-desc ">Photo or Video</p>
-      </div>
+          <p className="media-icon-desc ">Photo</p>
+      </button>
 
-      <div className="media-type">
-          <FontAwesomeIcon icon={faTags} className="icon-container tag"/>
-          <p className="media-icon-desc">Tag</p>
-      </div>
-
-      <div className="media-type">
-        <FontAwesomeIcon icon={faLocationArrow} className="icon-container location"/>
-        <p className="media-icon-desc">Location</p>
-      </div>
-      <Button variant="contained" className="btn" color="primary">
+      <Button disabled={postDisabled} variant="contained" className="btn" onClick={postData} color="primary">
         Share!
       </Button>
     </div>
@@ -137,61 +248,68 @@ if(ContextApp.user)
 
   <div className="feed-container">
 
-   <div className="post-container">
-      <div className="header">
-           <img src={Person} className="person-avatar-online"/>
-           <p className="post-username">Person Name</p>
-      </div>
-      <div className="post-body">
-        <p className="description">Lorem ipsum dolor sit amet, copiosae percipit temporibus cu sit. An clita causae deleniti mea, te etiam ocurreret nec, te mel aliquam omittam. Nisl laoreet invenire eam ne, cu noster semper blandit his. Ius in essent complectitur, prompta facilisi electram mel eu, mea eu eripuit ceteros definiebas. Usu ne causae delectus intellegat.
+  {postIsUploading &&    <div className="post-is-loading">
+      <img src={Loader} className="gif-loader" />
+      <p className="loading-post-text">Uploading Post...</p>
+    </div>
+  }
 
-  Sit te elitr utinam, cu inani iisque fastidii cum. Pri ut alia brute incorrupte, eum sanctus suscipiantur ut, at nisl copiosae vivendum has. His graeci docendi constituam at, vidit tincidunt cu vim. Eum facilis albucius et.
+  {postError && <p className='post-error-uploaded'>ERROR WHILE UPLOADING POST!</p>}
 
-  Vidit habeo te nam. Aliquid consequat quaerendum pro in. Repudiare laboramus vim ne, soluta euripidis disputando ut vim. Mea ut eripuit pericula, pri cu modo viderer iracundia. An sit incorrupte theophrastus, vel ea deterruisset conclusionemque, ad eam fugit nostrud sententiae. Docendi convenire evertitur est an.
 
-  Ferri oblique ad pro. Qui cu veri ponderum. Id probo inimicus usu, vix labore ponderum ut. Timeam liberavisse consectetuer pri at, cu malis civibus est. Mazim soleat an sea, qui at quot reprimique. Usu et posse vulputate.
+  {/*======================== HERE WE HAVE POSTS ========================*/}
+  {posts.length>0 && posts.map((post,id)=>{
 
-  Ut est illum discere appellantur, vel porro exerci no. Mei tamquam maiestatis ad, nemore omittam volutpat in eum, clita soluta eum in. Stet tantas eum ne. Scripta inimicus reprimique ea sit, pri an inani consulatu urbanitas.  </p>
-      <div>
-        <img src={Post} alt="post-image" className="post-image"/>
-      </div>
-       <div className="post-feedback-section">
-          <FontAwesomeIcon icon={faThumbsUp} style={{"cursor":"pointer"}} onClick={handleLike} className={liked? "icon-container like post-elem-clicked":"icon-container like" }/>
-          <FontAwesomeIcon icon={faComment} onClick={handleToggleComm} style={{"cursor":"pointer"}} className={toggleComments? "icon-container post-elem-clicked":"icon-container"}/>
-       </div>
+      return(
+        <div className="post-container" key={id}>
+          <div className="header">
+               <img src={`data:image/jpeg;base64,${post.postHolder.profilePicture}`} className="person-avatar-online"/>
+               <p className="post-username">{post.postHolder.username}</p>
+          </div>
+          <div className="post-body">
+            <p className="description"> {post.desc}</p>
+            <div>
+            <img src={`data:image/jpeg;base64,${post.img}`} alt="post-image" className="post-image"/>
+          </div>
+           <div className="post-feedback-section">
+              <FontAwesomeIcon icon={faThumbsUp} style={{"cursor":"pointer"}} onClick={handleLike} className={liked? "icon-container like post-elem-clicked":"icon-container like" }/>
+              <FontAwesomeIcon icon={faComment} onClick={handleToggleComm} style={{"cursor":"pointer"}} className={toggleComments? "icon-container post-elem-clicked":"icon-container"}/>
+           </div>
 
-       <div className={toggleComments? "post-comment-section" : "post-comment-section not-display"}>
+           <div className={toggleComments? "post-comment-section" : "post-comment-section not-display"}>
 
-          <TextField
-          id="outlined-multiline-static"
-          label="Add comment"
-          multiline
-          style={{width:"80%"}}
-          rows={2}
-          defaultValue=""
-           />
-           <Button variant="contained" className="btn btn-post" color="primary">
-             Post
-           </Button>
-           <div className="previous-comments">
+              <TextField
+              id="outlined-multiline-static"
+              label="Add comment"
+              multiline
+              style={{width:"80%"}}
+              rows={2}
+              defaultValue=""
+               />
+               <Button variant="contained" className="btn btn-post" color="primary">
+                 Post
+               </Button>
+               <div className="previous-comments">
 
-           <div className="card-reply">
-               <div className="card-reply-header">
-                 <img src={Person} alt="person" className="person-avatar question-card-reply-person-image"/>
-                 <p className="card-reply-username">Person name said:</p>
+               <div className="card-reply">
+                   <div className="card-reply-header">
+                     <img src={Person} alt="person" className="person-avatar question-card-reply-person-image"/>
+                     <p className="card-reply-username">Person name said:</p>
+                   </div>
+                   <p className="card-reply-text-post">Eu sincer nu cred ca merg lucrurile asa cum spui tu, se poate sa gasesti o solutie mai buna</p>
                </div>
-               <p className="card-reply-text-post">Eu sincer nu cred ca merg lucrurile asa cum spui tu, se poate sa gasesti o solutie mai buna</p>
-           </div>
+
+               </div>
 
            </div>
-
+          </div>
        </div>
-      </div>
-   </div>
+      )
+  })}
 
-   <div className="post-container">
-      <img src={`data:image/jpeg;base64,${ContextApp.user.profilePicture}`} className="person-avatar-online"/>
-   </div>
+{/*======================== HERE IS POST END(there is another post below this) ========================*/}
+
+
   </div>
   <div className="right-nav">
       <div className="birthday-container">
@@ -214,7 +332,6 @@ if(ContextApp.user)
       <div></div>
     )
   }
-
 }
 
 export default MainPage;

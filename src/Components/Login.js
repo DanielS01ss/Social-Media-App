@@ -42,6 +42,7 @@ const setCookie = (token,refreshToken)=>{
  const handleLogin = (evt)=>{
    console.log("I am here")
     evt.preventDefault();
+
     axios.post(LOGIN_URL,{
       email:email,
       password:pass
@@ -55,6 +56,7 @@ const setCookie = (token,refreshToken)=>{
           ContextApp.updateRefreshToken(resp.data.refreshToken);
           ContextApp.setLoggedIn(true);
           // console.log("Context App From Login:",ContextApp);
+          ContextApp.fetchUserPosts(); 
           history.push("/user/feed");
 
       }

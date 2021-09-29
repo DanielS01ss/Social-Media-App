@@ -64,7 +64,8 @@ const App = ()=>{
 const [loggedIn, setLoggedIn] = useState(false);
 let [user,setUser] = useState({});
 const [isLoading, setIsLoading] = useState(true);
-
+const [userPosts,setUserPosts] = useState([]);
+const [isLoadingPosts,setIsLoadingPosts] = useState(false);
 
 const  setCookie = (cName, cValue, expDays)=> {
         let date = new Date();
@@ -118,6 +119,35 @@ const refreshTokenFunc = ()=>{
   }
 }
 
+const fetchUserPosts = ()=>{
+    const {token} = getStoredTokens();
+    if(token!='')
+    {
+      if(!isTokenExpired(token))
+      {
+        axios({
+          url:'http://localhost:8000/api/posts/getposts',
+          method:'post',
+          headers:{
+            'Authorization':`Bearer ${token}`
+          }
+        }).then(resp=>{
+          console.log(resp);
+          setUserPosts(resp);
+          setIsLoading(false);
+          setIsLoadingPosts(false);
+        }).catch(err=>{
+          setIsLoading(false);
+          setLoggedIn(false);
+          setIsLoadingPosts(false);
+        })
+
+      }
+    }
+
+    setIsLoading(false);
+    setIsLoadingPosts(false);
+}
 
 const getUserAndSet = (myToken)=>{
   const data = {
@@ -138,9 +168,10 @@ axios({
   {
     setUser(resp.data.user);
     setLoggedIn(true);
-    setTimeout(()=>{
-      setIsLoading(false);
-    },2000);
+
+    // /aici vom trage si postarile
+    setIsLoadingPosts(true);
+    fetchUserPosts();
   }
 }).catch(err=>{
   console.log(err);
@@ -235,7 +266,11 @@ const updateToken = (tk)=>{
     updateRefreshToken:updateRefreshToken,
     getUserAndSet:getUserAndSet,
     refreshToken:refreshTokenFunc,
-    updateUserProperty:updateUserProperty
+    updateUserProperty:updateUserProperty,
+    userPosts:userPosts,
+    setUserPosts:setUserPosts,
+    isLoadingPosts:isLoadingPosts,
+    fetchUserPosts:fetchUserPosts
   }
 
 useEffect(()=>{
@@ -275,7 +310,6 @@ useEffect(()=>{
      </div>
    )
  }
-
 }
 
 export default App;

@@ -134,6 +134,22 @@ box-shadow: 0px 0px 7px 1px rgba(107,107,107,0.82);
    margin-left: 18%;
 }
 
+.loading-data-container{
+    margin-left:50%;
+    margin-bottom: 100px;
+}
+
+.loading-data-gif{
+   width: 100px;
+}
+
+.loading-text{
+   margin-left: -40px;
+   font-size: 1.5rem;
+}
+
+
+
 @media only screen and (max-width:1200px)
 {
   .person-avatar-profile{
@@ -151,6 +167,9 @@ box-shadow: 0px 0px 7px 1px rgba(107,107,107,0.82);
 
 @media only screen and (max-width:950px){
 
+    .loading-data-container{
+        margin-left: 40%;
+    }
     .user-heading-container{
       flex-direction: column;
     }
