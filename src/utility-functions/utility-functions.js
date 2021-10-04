@@ -8,7 +8,6 @@ function clearCookies( wildcardDomain=false, primaryDomain=true, path=null ){
 }
 
 const isTokenExpired = (token)=>{
-    
 
     if(Date.now()>=jwt_decode(token).exp*1000)
     {
@@ -65,4 +64,18 @@ function setCookie(cName, cValue, expDays) {
 }
 
 
-export {clearCookies,isTokenExpired,getStoredTokens,setCookie}
+function shuffle(array) {
+  let currentIndex = array.length,  randomIndex;
+
+  while (currentIndex != 0) {
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+    [array[currentIndex], array[randomIndex]] = [
+    array[randomIndex], array[currentIndex]];
+  }
+
+  return array;
+}
+
+
+export {clearCookies,isTokenExpired,getStoredTokens,setCookie,shuffle}

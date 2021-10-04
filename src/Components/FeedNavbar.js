@@ -234,7 +234,7 @@ const [profileImg,setProfileImg] = useState("");
          aria-haspopup="true"
          color="inherit"
        >
-         <img src={`data:image/jpeg;base64,${profileImg}`} className="person-icon-nav"/>
+         <img src={`data:image/jpeg;base64,${AppContextData.user.profilePicture}`} className="person-icon-nav"/>
        </IconButton>
        <p>Profile</p>
      </MenuItem>
@@ -280,6 +280,7 @@ const [profileImg,setProfileImg] = useState("");
       window.removeEventListener("resize",handleDrawerAtResize);
     }
   },[AppContextData.user.user])
+
 
 
 if(AppContextData.user){
@@ -349,6 +350,7 @@ if(AppContextData.user){
              onClick={handleProfileMenuOpen}
              color="inherit"
            >
+           {console.log("AppContextData.user.profilePicture:",AppContextData.user)}
            <img src={`data:image/jpeg;base64,${AppContextData.user.profilePicture}`} className="person-icon-nav"/>
            </IconButton>
          </div>

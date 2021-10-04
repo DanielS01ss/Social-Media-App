@@ -28,7 +28,7 @@ import Loading from '../Components/Loading.js';
 import {getStoredTokens} from "../utility-functions/utility-functions";
 import axios from "axios";
 import Loader from "../images/loader.gif";
-import {POST} from "../Endpoints/API_ENDPOINTS";
+import {POST,LIKE_POST} from "../Endpoints/API_ENDPOINTS";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -41,6 +41,8 @@ const useStyles = makeStyles((theme) => ({
 
 const MainPage =()=>{
 
+
+const ContextApp = useContext(AppContext);
 const classes = useStyles();
 const [value, setValue] = React.useState('Controlled');
 const [toggleComments, setToggleComments] = useState(false);
@@ -54,7 +56,9 @@ const [postText,setPostText] = useState("");
 const [postDisabled,setPostDisabled] = useState(true);
 const [postIsUploading,setPostIsUploading] = useState(false);
 const [postError,setPostError] = useState(false);
-const [posts,setPosts] = useState([])
+const [posts,setPosts] = useState([]);
+const [postLiked,setPostLiked] = useState({});
+const [commentDisplay,setCommentDisplay] = useState({});
 
 const handleChange = (event) => {
  setValue(event.target.value);
@@ -68,9 +72,6 @@ const handleToggleComm = ()=>{
   setToggleComments(!toggleComments);
 }
 
-const handleLike = ()=>{
-  setLiked(!liked);
-}
 
 const imgUploadProcess = (evt)=>{
   if(evt.target.files[0]!=undefined)
@@ -114,21 +115,38 @@ const postData = ()=>{
     }
   }).then(resp=>{
     console.log(resp);
+
     if(resp.status == 200)
     {
       setPostIsUploading(false);
+      ///seteaza un parametru de _id care sa fie id-ul postarii
+      ///primit din backend!!
+      console.log(resp);
       let postObj = {
         comments:[],
         desc:postText,
         img:imageToUpload.coverPicture,
         likes:[],
         postHolder:ContextApp.user,
-        userId:ContextApp.user._id
+        userId:ContextApp.user._id,
+        _id:resp.data
       }
       let oldElems;
       setPosts(oldArr => [postObj,...oldArr]);
       setImageToUpload("");
       setPostText("");
+
+      // for(const post of ContextApp.feedPosts)
+      // {
+      //    const likedPost = !(post.likes.find((ps)=>ps.userId == ContextApp.user._id) == undefined);
+      //    const psId = post._id;
+      //    data[psId] = likedPost;
+      //
+      // }
+       // setPostLiked({...postLiked,...data});
+      const data = {}
+      data[resp.data] = false;
+     setPostLiked({...postLiked,...data})
     }
     else{
       console.log("Hello from else!");
@@ -136,12 +154,15 @@ const postData = ()=>{
       alert("Error while posting!");
     }
   }).catch(err=>{
-    console.log(err);
+    if( err.response && err.response.status == 401)
+    {
+      // ContextApp.setIsLoading(true);
+      ContextApp.setLoggedIn(false);
+
+    }
     setPostIsUploading(false);
     alert("Error while posting!");
   })
-
-
 }
 
 const handlePostText = (evt)=>{
@@ -172,7 +193,55 @@ const getData = ()=>{
   })
 }
 
-const ContextApp = useContext(AppContext);
+const handleLike = (postId)=>{
+
+    const data = {};
+    data[postId] = !postLiked[postId];
+     setPostLiked({...postLiked,...data});
+
+    const {token} = getStoredTokens();
+    const stateValue = !postLiked[postId];
+    ((likeVal)=>{
+      axios({
+        method:'put',
+        url:LIKE_POST(postId),
+        headers:{
+          'Authorization':`Bearer ${token}`
+        }
+      }).then(resp=>{
+          if(resp.status == 200){
+             if(likeVal)
+             {
+               const newPosts = posts.map((post)=>{
+                 if(post._id == postId)
+                 {
+                   post.likes.push({
+                     userId:ContextApp.user._id
+                   })
+                 }
+                 return post;
+               });
+
+               setPosts([...newPosts]);
+             } else {
+               const newPosts = posts.map((post)=>{
+                 if(post._id == postId)
+                 {
+                   post.likes = post.likes.filter(ps=>ps.userId!=ContextApp.user._id);
+                 }
+                 return post;
+               });
+
+               setPosts([...newPosts]);
+
+             }
+          }
+      }).catch(err=>{
+        console.log(err);
+      })
+    })(stateValue);
+}
+
 const [isLoadingData,setIsLoadingData] = useState(true);
 let user;
 
@@ -185,6 +254,12 @@ useEffect(()=>{
       setIsLoadingData(false);
     }
 
+    const commentData = {};
+    for(const post of ContextApp.feedPosts){
+      console.log(post);
+    }
+    setCommentDisplay({...commentDisplay,...commentData});
+
     return()=>{
       window.removeEventListener('resize',resFunc);
     }
@@ -192,15 +267,29 @@ useEffect(()=>{
 
 
 
+useEffect(()=>{
+    setPosts(ContextApp.feedPosts);
+    const data = {};
+    for(const post of ContextApp.feedPosts)
+    {
+       const likedPost = !(post.likes.find((ps)=>ps.userId == ContextApp.user._id) == undefined);
+       const psId = post._id;
+       data[psId] = likedPost;
+
+    }
+     setPostLiked({...postLiked,...data});
+
+},[ContextApp.feedPosts])
+
+
 if(ContextApp.user)
  {
-
     return(
       <div className="main-container">
       <div className="side-nav options">
      <div className="item-container item-large">
        <FontAwesomeIcon icon={faCommentDots} className="icon-container"/>
-       < span className="inline">
+       <span className="inline">
         <Link to="/user/messages" style={{textDecoration:"none",fontSize:"1.3rem", color:"#000"}}>Chats</Link>
        </span>
      </div>
@@ -259,21 +348,20 @@ if(ContextApp.user)
 
   {/*======================== HERE WE HAVE POSTS ========================*/}
   {posts.length>0 && posts.map((post,id)=>{
-
       return(
         <div className="post-container" key={id}>
           <div className="header">
                <img src={`data:image/jpeg;base64,${post.postHolder.profilePicture}`} className="person-avatar-online"/>
-               <p className="post-username">{post.postHolder.username}</p>
+               <p className="post-username">{post.postHolder.name}</p>
           </div>
           <div className="post-body">
             <p className="description"> {post.desc}</p>
             <div>
-            <img src={`data:image/jpeg;base64,${post.img}`} alt="post-image" className="post-image"/>
+            {post.img &&  <img src={`data:image/jpeg;base64,${post.img}`} alt="post-image" className="post-image"/>}
           </div>
            <div className="post-feedback-section">
-              <FontAwesomeIcon icon={faThumbsUp} style={{"cursor":"pointer"}} onClick={handleLike} className={liked? "icon-container like post-elem-clicked":"icon-container like" }/>
-              <FontAwesomeIcon icon={faComment} onClick={handleToggleComm} style={{"cursor":"pointer"}} className={toggleComments? "icon-container post-elem-clicked":"icon-container"}/>
+             <div><FontAwesomeIcon icon={faThumbsUp} style={{cursor:'pointer'}} onClick={()=>{handleLike(post._id)}} className={postLiked[post._id]?"icon-container like post-elem-clicked":"icon-container"}/><span style={{marginLeft:'20px'}}>{post.likes.length}</span></div>
+             <FontAwesomeIcon icon={faComment} style={{cursor:'pointer'}} onClick={handleToggleComm} className={toggleComments?"icon-container like post-elem-clicked":"icon-container"}/>
            </div>
 
            <div className={toggleComments? "post-comment-section" : "post-comment-section not-display"}>
@@ -291,13 +379,17 @@ if(ContextApp.user)
                </Button>
                <div className="previous-comments">
 
-               <div className="card-reply">
-                   <div className="card-reply-header">
-                     <img src={Person} alt="person" className="person-avatar question-card-reply-person-image"/>
-                     <p className="card-reply-username">Person name said:</p>
-                   </div>
-                   <p className="card-reply-text-post">Eu sincer nu cred ca merg lucrurile asa cum spui tu, se poate sa gasesti o solutie mai buna</p>
-               </div>
+                 {post.comments.map((postComm)=>{
+                   return(
+                     <div className="card-reply">
+                           <div className="card-reply-header">
+                             <img src={`data:image/jpeg;base64,${postComm.userPhoto}`} alt="person" className="person-avatar question-card-reply-person-image"/>
+                             <p className="card-reply-username">{postComm.username} said:</p>
+                           </div>
+                           <p className="card-reply-text-post">{postComm.comment}</p>
+                       </div>
+                   )
+                 })}
 
                </div>
 

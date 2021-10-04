@@ -56,7 +56,8 @@ const setCookie = (token,refreshToken)=>{
           ContextApp.updateRefreshToken(resp.data.refreshToken);
           ContextApp.setLoggedIn(true);
           // console.log("Context App From Login:",ContextApp);
-          ContextApp.fetchUserPosts(); 
+          ContextApp.fetchUserPosts();
+          ContextApp.fetchFeedPosts();
           history.push("/user/feed");
 
       }
