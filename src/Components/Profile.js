@@ -19,16 +19,18 @@ import {faHome} from '@fortawesome/free-solid-svg-icons';
 import {faCity} from '@fortawesome/free-solid-svg-icons';
 import {faHeart} from '@fortawesome/free-solid-svg-icons';
 import {faGraduationCap} from '@fortawesome/free-solid-svg-icons';
+import {faUserCheck} from '@fortawesome/free-solid-svg-icons';
 import {Link} from "react-router-dom";
 import {AppContext} from "../Context/AppContext";
 import Loading from '../Components/Loading.js';
 import {getStoredTokens} from "../utility-functions/utility-functions.js";
 import jwt_decode from "jwt-decode";
-import {FETCH_USER_URL} from "../Endpoints/API_ENDPOINTS";
+import {FETCH_USER_URL,LIKE_POST,FOLLOW_USER,UNFOLLOW_USER} from "../Endpoints/API_ENDPOINTS";
 import axios from "axios";
 import {useHistory} from "react-router-dom";
 import {clearCookies} from "../utility-functions/utility-functions";
 import NotFound from "./PageNotFound";
+import LoadingDataGif from "../images/loader.gif";
 
 const _ = require("lodash");
 
@@ -41,30 +43,130 @@ const Profile = ({location}) =>{
       },
     },
   }));
+  const [commentsContent,setCommentsContent] = useState({});
   const [toggleComments, setToggleComments] = useState(false);
   const [liked,setLiked] = useState(false);
   const [loadingData,setLoadingData] = useState(true);
   const classes = useStyles();
   const [value, setValue] = React.useState('Controlled');
   const history = useHistory();
-
-  const handleToggleComm = ()=>{
-    setToggleComments(!toggleComments);
-  }
-
-  const handleLike = ()=>{
-    setLiked(!liked);
-  }
-
   const ContextAppData = useContext(AppContext);
   const user = ContextAppData.user;
   const [isLoading,setIsLoading] = useState(true);
-  const [displayPostForm,setDisplayPostForm] = useState(false);
+  const [displayUserInteract,setDisplayUserInteract] = useState(false);
   const [userNotFound,setUserNotFound] = useState(false);
   const [fetchedUser,setFetchedUser] = useState({});
+  const [fetchedUserPosts,setFetchedUserPosts] = useState({});
+  const [mainProfile,setMainProfile] = useState(false);
+  const [postLiked,setPostLiked] = useState({});
+  const [isUserFollowed,setIsUserFollowed] = useState(false);
+  const [commentDisplay,setCommentDisplay] = useState({});
 
-  const fetchUser = (id,token)=>{
+  const handleToggleComm = (psId)=>{
+      const data = {}
+      data[psId] = !commentDisplay[psId];
+      setCommentDisplay({...commentDisplay,...data});
+  }
 
+const handleLike = (postId)=>{
+
+    const data = {};
+    data[postId] = !postLiked[postId];
+
+    setPostLiked({...postLiked,...data});
+    const {token} = getStoredTokens();
+    const stateValue = !postLiked[postId];
+    ((likeVal)=>{
+      axios({
+        method:'put',
+        url:LIKE_POST(postId),
+        headers:{
+          'Authorization':`Bearer ${token}`
+        }
+      }).then(resp=>{
+          if(resp.status == 200){
+             if(likeVal)
+             {
+               const newPosts = fetchedUserPosts.data.map((post)=>{
+                 if(post._id == postId)
+                 {
+                   post.likes.push({
+                     userId:ContextAppData.user._id
+                   })
+                 }
+                 return post;
+               });
+
+               setFetchedUserPosts({...fetchedUserPosts,data:newPosts});
+             } else {
+               const newPosts = fetchedUserPosts.data.map((post)=>{
+                 if(post._id == postId)
+                 {
+                   post.likes = post.likes.filter(ps=>ps.userId!=ContextAppData.user._id);
+                 }
+
+                 return post;
+               });
+
+               setFetchedUserPosts({...fetchedUserPosts,data:newPosts});
+
+             }
+          }
+      }).catch(err=>{
+        console.log(err);
+      })
+    })(stateValue);
+
+
+   }
+
+
+const fetchPosts = (id)=>{
+    const {token} = getStoredTokens();
+ if(token)
+ {
+   axios({
+       url:'http://localhost:8000/api/posts/userposts',
+       method:'get',
+       headers:{
+         'Accept': 'application/json',
+         'Content-Type': 'application/json',
+         'Authorization':`Bearer ${token}`,
+         'UserId':id
+       }
+   }).then(resp=>{
+
+     setFetchedUserPosts(resp);
+     const data = {};
+     const commentData = {};
+     const commentsText = {};
+     for(const post of resp.data)
+     {
+        const likedPost = !(post.likes.find((ps)=>ps.userId == ContextAppData.user._id) == undefined);
+        const psId = post._id;
+        data[psId] = likedPost;
+        commentData[psId] = false;
+        commentsText[psId] = '';
+     }
+      setPostLiked({...postLiked,...data});
+      setCommentDisplay({...commentDisplay,...commentData});
+      setCommentsContent({...commentsContent,...commentsText});
+
+   }).catch(err=>{
+     setFetchedUserPosts({
+       status:500,
+       data:[]
+     })
+   })
+ } else{
+
+   ContextAppData.setLoggedIn(false);
+   ContextAppData.setIsLoading(true);
+ }
+}
+
+
+const fetchUser = (id,token)=>{
     axios({
       method:'GET',
       url:FETCH_USER_URL(id),
@@ -74,7 +176,10 @@ const Profile = ({location}) =>{
     }).then((resp)=>{
       if(resp.status == 200)
       {
+        const isFollowed = resp.data.followers.find(us=>us.username == ContextAppData.user.username)!=undefined;
+        setIsUserFollowed(isFollowed);
         setFetchedUser(resp.data);
+        fetchPosts(id);
       } else {
         const obj = {
           fetched : false
@@ -86,35 +191,48 @@ const Profile = ({location}) =>{
     })
   }
 
-  useEffect(()=>{
-
-    const params = new URLSearchParams(location.search);
-    const id = params.get('id');
+const handleFollowUser = ()=>{
+    setIsUserFollowed(true);
     const {token} = getStoredTokens();
-    if(token && id)
-    {
-      if(id == ContextAppData.user._id)
-      {
-        setFetchedUser( ContextAppData.user);
-        setDisplayPostForm(true);
+    axios({
+      url:FOLLOW_USER(fetchedUser._id),
+      method:'put',
+      headers:{
+        'Authorization':`Bearer ${token}`
       }
-      else
-      {
-        setDisplayPostForm(false);
-        fetchUser(id,token);
-      }
+    }).then(resp=>{
 
-    } else {
-      if(!token)
-      {
-        ContextAppData.setLoggedIn(false);
-        ContextAppData.setIsLoading(true);
-        clearCookies()
-      }
-    }
-  },[ContextAppData.user])
+    }).catch(err=>{
+      console.log(err);
+    })
+}
+
+const handleUnfollowUser = ()=>{
+   setIsUserFollowed(false);
+   const {token} = getStoredTokens();
+   axios({
+     url:UNFOLLOW_USER(fetchedUser._id),
+     method:'put',
+     headers:{
+       'Authorization':`Bearer ${token}`
+     }
+   }).then(resp=>{
+
+   }).catch(err=>{
+     console.log(err);
+   })
+}
+
+const handleChangeCommInpVal = (evt,postId)=>{
+  const commentTextData = {};
+  commentTextData[postId] = evt.target.value;
+  setCommentsContent({...commentsContent,...commentTextData});
+
+}
+
 
 useEffect(()=>{
+
   const params = new URLSearchParams(location.search);
   const id = params.get('id');
   const {token} = getStoredTokens();
@@ -122,15 +240,15 @@ useEffect(()=>{
   {
     if(id == ContextAppData.user._id)
     {
-      setFetchedUser( ContextAppData.user);
-      setDisplayPostForm(true);
+      setFetchedUser(ContextAppData.user);
+      fetchPosts(ContextAppData.user._id);
+      setDisplayUserInteract(false);
     }
     else
     {
-      setDisplayPostForm(false);
+      setDisplayUserInteract(true);
       fetchUser(id,token);
     }
-
   } else {
     if(!token)
     {
@@ -140,6 +258,7 @@ useEffect(()=>{
     }
   }
 },[location])
+
 
   if(!_.isEmpty(fetchedUser))
   {
@@ -158,19 +277,33 @@ useEffect(()=>{
                 <img className="person-avatar-profile" src={`data:image/jpeg;base64,${fetchedUser.profilePicture}`} />
                 <p className="username">{fetchedUser.username}</p>
                 <p className="user-desc">{fetchedUser.description}</p>
+            {
+              displayUserInteract &&
+
                 <div className="user-contact">
-                  <p className="user-contact-action">
+                  <p className="user-contact-action" >
+
+              {isUserFollowed? <div className="hover-mouse" onClick={handleUnfollowUser}>
+                  <FontAwesomeIcon icon = {faUserCheck} style={{"color":"#6600ff"}} className = "user-action-icon"/>
+                  <span className="user-action-icon-label">Unfollow</span>
+                </div>
+                  :
+                <div onClick={handleFollowUser} className="hover-mouse">
                   <FontAwesomeIcon icon = {faUserPlus} className = "user-action-icon"/>
                   <span className="user-action-icon-label">Follow</span>
+                </div>
+                }
                   </p>
                   <p className="user-contact-action">
                   <FontAwesomeIcon icon = {faCommentAlt} className = "user-action-icon"/>
                   <span className="user-action-icon-label"><Link style={{textDecoration:"none",fontSize:"1.3rem"}} to="/user/messages">Message</Link></span>
                   </p>
                 </div>
+            }
+
              </div>
              <div className="user-heading-container">
-                 <div className={displayPostForm?"profile-info ":"profile-info no-form"}>
+                 <div className="profile-info no-form">
                    <p className="profile-info-title">User Description</p>
                    <p className="profile-info-item"> <FontAwesomeIcon icon={faHome} className="profile-description-icon"/>From:</p><span>{fetchedUser.from}</span>
                    <p className="profile-info-item"><FontAwesomeIcon icon={faCity} className="profile-description-icon"/>Lives in:</p><span>{fetchedUser.livesIn}</span>
@@ -198,108 +331,75 @@ useEffect(()=>{
                    }
                    <p className="profile-info-item"><FontAwesomeIcon icon={faGraduationCap} className="profile-description-icon"/>Studied at:</p><span>{fetchedUser.education}</span>
                  </div>
-                 {displayPostForm &&
+             </div>
+             {/*Posts*/}
+             {console.log("post are :",fetchedUserPosts)}
+             {fetchedUserPosts.data ?
+             fetchedUserPosts.data.map((post)=>{
+               return(
+                 <div className="user-posts-container ">
+                       <div className={displayUserInteract? "profile-post-container ":" profile-post-container  "}>
+                         <div className="header">
+                             <img src={`data:image/jpeg;base64,${post.postHolder.profilePicture}`} className="person-avatar-online"/>
+                             <p className="post-username">{post.postHolder.name}</p>
+                            </div>
+                            <div className="post-body">
+                              <p className="description">
+                                {post.desc}
+                              </p>
+                            <div>
+                            {post.img &&  <img src={`data:image/jpeg;base64,${post.img}`} alt="post-image" className="post-image"/>}
+                            </div>
+                             <div className="post-feedback-section">
+                                <div><FontAwesomeIcon icon={faThumbsUp} style={{cursor:'pointer'}} onClick={()=>{handleLike(post._id)}} className={postLiked[post._id]?"icon-container like post-elem-clicked":"icon-container"}/><span style={{marginLeft:'20px'}}>{post.likes.length}</span></div>
+                                <FontAwesomeIcon icon={faComment} style={{cursor:'pointer'}} onClick={()=>{handleToggleComm(post._id)}} className={commentDisplay[post._id]?"icon-container like post-elem-clicked":"icon-container"}/>
+                             </div>
+                            </div>
 
-                   <div className="profile-submit-post">
-                    <div className="profile-form-container">
-                      <div className="person-avatar-container">
-                        <img src={`data:image/jpeg;base64,${fetchedUser.profilePicture}`} alt="person" className="person-avatar"/>
-                      </div>
+                            <div className={commentDisplay[post._id]? "post-comment-section" : "post-comment-section not-display"}>
+                               <TextField
+                               id="outlined-multiline-static"
+                               label="Add comment"
+                               multiline
+                               style={{width:"80%"}}
+                               rows={2}
+                               defaultValue=""
+                               value = {commentsContent[post._id]}
+                               onChange = {(evt)=>{handleChangeCommInpVal(evt,post._id)}}
+                                />
 
-                         <form className={`${classes.root} text-input`} noValidate autoComplete="off">
-                         <TextField
-                      id="outlined-multiline-static"
-                      label="What is on your mind?"
-                      multiline
-                      style={{width:"80%"}}
-                      rows={2}
-                      defaultValue=""
-                       />
-                       <div className="media-type-container">
-                         <div className="media-type">
-                             <FontAwesomeIcon icon={faPhotoVideo} className="icon-container photo-video"/>
-                             <p className="media-icon-desc ">Photo or Video</p>
+                              <Button variant="contained" onClick={(evt)=>{const passData = commentsContent[post._id]; ContextAppData.handlePostComment(evt,post._id,setFetchedUserPosts,fetchedUserPosts,passData,setCommentsContent,commentsContent)}} className="btn btn-post" color="primary">
+                                  Post
+                                </Button>
+                                <div className="previous-comments">
+                                  {post.comments.map((postComm)=>{
+                                    return(
+                                      <div className="card-reply">
+                                            <div className="card-reply-header">
+                                              <img src={`data:image/jpeg;base64,${postComm.userPhoto}`} alt="person" className="person-avatar question-card-reply-person-image"/>
+                                              <p className="card-reply-username">{postComm.username} said:</p>
+                                            </div>
+                                            <p className="card-reply-text-post">{postComm.comment}</p>
+                                        </div>
+                                    )
+                                  })}
+
+                                </div>
+                            </div>
                          </div>
-
-                         <div className="media-type">
-                             <FontAwesomeIcon icon={faTags} className="icon-container tag"/>
-                             <p className="media-icon-desc">Tag</p>
-                         </div>
-
-                         <div className="media-type">
-                           <FontAwesomeIcon icon={faLocationArrow} className="icon-container location"/>
-                           <p className="media-icon-desc">Location</p>
-                         </div>
-                         <Button variant="contained" className="btn" color="primary">
-                           Share!
-                         </Button>
-
                        </div>
-
-                       </form>
-
-                      </div>
-                 </div>
+                   )
+                })
+                     :
+                     <div className='loading-data-container'>
+                         <img src={LoadingDataGif} className='loading-data-gif'/>
+                         <p className='loading-text'>Loading posts...</p>
+                     </div>
                  }
-
+             {/*Posts*/}
              </div>
-             <div className="user-posts-container ">
-
-                 <div className={displayPostForm? "profile-post-container":" profile-post-container no-form-before"}>
-                   <div className="header">
-                       <img src={`data:image/jpeg;base64,${fetchedUser.profilePicture}`} className="person-avatar-online"/>
-                       <p className="post-username">{fetchedUser.username}</p>
-                      </div>
-                      <div className="post-body">
-                        <p className="description">Lorem ipsum dolor sit amet, copiosae percipit temporibus cu sit. An clita causae deleniti mea, te etiam ocurreret nec, te mel aliquam omittam. Nisl laoreet invenire eam ne, cu noster semper blandit his. Ius in essent complectitur, prompta facilisi electram mel eu, mea eu eripuit ceteros definiebas. Usu ne causae delectus intellegat.
-
-              Sit te elitr utinam, cu inani iisque fastidii cum. Pri ut alia brute incorrupte, eum sanctus suscipiantur ut, at nisl copiosae vivendum has. His graeci docendi constituam at, vidit tincidunt cu vim. Eum facilis albucius et.
-
-              Vidit habeo te nam. Aliquid consequat quaerendum pro in. Repudiare laboramus vim ne, soluta euripidis disputando ut vim. Mea ut eripuit pericula, pri cu modo viderer iracundia. An sit incorrupte theophrastus, vel ea deterruisset conclusionemque, ad eam fugit nostrud sententiae. Docendi convenire evertitur est an.
-
-              Ferri oblique ad pro. Qui cu veri ponderum. Id probo inimicus usu, vix labore ponderum ut. Timeam liberavisse consectetuer pri at, cu malis civibus est. Mazim soleat an sea, qui at quot reprimique. Usu et posse vulputate.
-
-              Ut est illum discere appellantur, vel porro exerci no. Mei tamquam maiestatis ad, nemore omittam volutpat in eum, clita soluta eum in. Stet tantas eum ne. Scripta inimicus reprimique ea sit, pri an inani consulatu urbanitas.  </p>
-                      <div>
-                        <img src={Post} alt="post-image" className="post-image"/>
-                      </div>
-                       <div className="post-feedback-section">
-                          <FontAwesomeIcon icon={faThumbsUp} style={{cursor:'pointer'}} onClick={handleLike} className={liked?"icon-container like post-elem-clicked":"icon-container"}/>
-                          <FontAwesomeIcon icon={faComment} style={{cursor:'pointer'}} onClick={handleToggleComm} className={toggleComments?"icon-container like post-elem-clicked":"icon-container"}/>
-                       </div>
-                      </div>
-
-                      <div className={toggleComments? "post-comment-section" : "post-comment-section not-display"}>
-
-                         <TextField
-                         id="outlined-multiline-static"
-                         label="Add comment"
-                         multiline
-                         style={{width:"80%"}}
-                         rows={2}
-                         defaultValue=""
-                          />
-                          <Button variant="contained" className="btn btn-post" color="primary">
-                            Post
-                          </Button>
-                          <div className="previous-comments">
-
-                          <div className="card-reply">
-                              <div className="card-reply-header">
-                                <img src={Person} alt="person" className="person-avatar question-card-reply-person-image"/>
-                                <p className="card-reply-username">Person name said:</p>
-                              </div>
-                              <p className="card-reply-text-post">Eu sincer nu cred ca merg lucrurile asa cum spui tu, se poate sa gasesti o solutie mai buna</p>
-                          </div>
-                          </div>
-                      </div>
-                   </div>
-                 </div>
-             </div>
-            </div>
+          </div>
          )
-
-
   } else {
     return(
       <div style={{paddingTop:"90px"}}>

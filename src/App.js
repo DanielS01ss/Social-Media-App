@@ -20,11 +20,11 @@ import {AppContext} from "./Context/AppContext";
 import React , {useContext,useEffect, useState} from "react";
 import { Redirect } from "react-router-dom";
 import axios from "axios";
-import {CHECK_TOKEN_URL,GET_USER_URL,REFRESH_TOKEN_URL} from "./Endpoints/API_ENDPOINTS";
+import {CHECK_TOKEN_URL,GET_USER_URL,REFRESH_TOKEN_URL,ADD_COMMENT,FEED_POSTS} from "./Endpoints/API_ENDPOINTS";
 import { useHistory } from "react-router-dom";
 import {useSetLoggedInTrue} from "./utility-functions/useSetLogin";
 import jwt_decode from "jwt-decode";
-import {clearCookies,isTokenExpired,getStoredTokens,setCookie} from "./utility-functions/utility-functions.js";
+import {clearCookies,isTokenExpired,getStoredTokens,setCookie,shuffle} from "./utility-functions/utility-functions.js";
 
 const _ = require("lodash");
 
@@ -42,7 +42,7 @@ const UserRoutePages = ()=>{
 }
 
 const AuthenticatedRoute = (props)=>{
-  console.log(props);
+
   if(props.loggedIn)
   {
     return(
@@ -64,7 +64,9 @@ const App = ()=>{
 const [loggedIn, setLoggedIn] = useState(false);
 let [user,setUser] = useState({});
 const [isLoading, setIsLoading] = useState(true);
-
+const [userPosts,setUserPosts] = useState([]);
+const [isLoadingPosts,setIsLoadingPosts] = useState(false);
+const [feedPosts,setFeedPosts] = useState([]);
 
 const  setCookie = (cName, cValue, expDays)=> {
         let date = new Date();
@@ -73,12 +75,34 @@ const  setCookie = (cName, cValue, expDays)=> {
         document.cookie = cName + "=" + cValue + "; " + expires + "; path=/";
 }
 
+const fetchFeedPosts = ()=>{
+
+  const {token} = getStoredTokens();
+
+  axios({
+    url:FEED_POSTS,
+    method:'get',
+    headers:{
+      'Authorization':`Bearer ${token}`
+    }
+  }).then(resp=>{
+    if(resp.status == 200)
+    {
+      const data_arr = shuffle(resp.data[0]);
+      setFeedPosts(data_arr);
+    }
+
+  }).catch(err=>{
+    console.log(err);
+  })
+}
+
+
 const updateUserProperty = (userObj)=>{
   setUser(userObj);
 }
 
 const refreshTokenFunc = ()=>{
-  console.log("Refresh token function was called!");
   setIsLoading(true);
   let {refreshToken} = getStoredTokens();
   if(refreshToken != '')
@@ -118,6 +142,35 @@ const refreshTokenFunc = ()=>{
   }
 }
 
+const fetchUserPosts = ()=>{
+    const {token} = getStoredTokens();
+    if(token!='')
+    {
+      if(!isTokenExpired(token))
+      {
+        axios({
+          url:'http://localhost:8000/api/posts/getposts',
+          method:'post',
+          headers:{
+            'Authorization':`Bearer ${token}`
+          }
+        }).then(resp=>{
+
+          setUserPosts(resp);
+          setIsLoading(false);
+          setIsLoadingPosts(false);
+        }).catch(err=>{
+          setIsLoading(false);
+          setLoggedIn(false);
+          setIsLoadingPosts(false);
+        })
+
+      }
+    }
+
+    setIsLoading(false);
+    setIsLoadingPosts(false);
+}
 
 const getUserAndSet = (myToken)=>{
   const data = {
@@ -133,14 +186,15 @@ axios({
   },
   data:data
 }).then(resp=>{
-  console.log(resp);
   if(resp.status == 200)
   {
     setUser(resp.data.user);
     setLoggedIn(true);
-    setTimeout(()=>{
-      setIsLoading(false);
-    },2000);
+
+    // /aici vom trage si postarile
+    fetchFeedPosts();
+    setIsLoadingPosts(true);
+    fetchUserPosts();
   }
 }).catch(err=>{
   console.log(err);
@@ -157,7 +211,6 @@ const reloadDataAfterRefresh = ()=>{
     let {token,refreshToken} = getStoredTokens();
     token = token.trim();
     refreshToken = refreshToken.trim();
-
    if(token != '' && refreshToken != '')
    {
 
@@ -217,8 +270,56 @@ const updateToken = (tk)=>{
     data.token = tk;
 }
 
-  const updateRefreshToken = (tk)=>{
+const updateRefreshToken = (tk)=>{
     data.refreshToken = tk;
+}
+
+const handlePostComment = (evt,postId,update,oldPosts,commentsData,resetData,beforeData) =>{
+
+     const {token} = getStoredTokens();
+     const newData = {};
+     newData[postId] = '';
+     resetData({...beforeData,...newData});
+    if(token)
+    {
+      axios({
+        url:ADD_COMMENT(postId),
+        method:'put',
+        headers:{
+          'Authorization':`Bearer ${token}`
+        },
+        data:{
+          comment:commentsData
+        }
+      }).then(resp=>{
+          if(resp.status == 200)
+          {
+                 const newPost = oldPosts.data.map((post)=>{
+                    if(post._id == postId)
+                    {
+                      post.comments.unshift({
+                        userId:user._id,
+                        comment:commentsData,
+                        userPhoto:user.profilePicture,
+                        username:user.username,
+                      })
+
+                    }
+                  return post;
+                 });
+                 update({...oldPosts,data:newPost});
+          }
+          else{
+            alert("Error while uploading post!")
+          }
+      }).catch(err=>{
+        console.log(err);
+        alert("Error while uploading post!")
+      })
+
+    } else if (isTokenExpired(token)){
+      refreshTokenFunc();
+    }
   }
 
   const data = {
@@ -235,7 +336,14 @@ const updateToken = (tk)=>{
     updateRefreshToken:updateRefreshToken,
     getUserAndSet:getUserAndSet,
     refreshToken:refreshTokenFunc,
-    updateUserProperty:updateUserProperty
+    updateUserProperty:updateUserProperty,
+    userPosts:userPosts,
+    setUserPosts:setUserPosts,
+    isLoadingPosts:isLoadingPosts,
+    fetchUserPosts:fetchUserPosts,
+    handlePostComment:handlePostComment,
+    feedPosts:feedPosts,
+    fetchFeedPosts:fetchFeedPosts
   }
 
 useEffect(()=>{
