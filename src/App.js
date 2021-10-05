@@ -274,53 +274,52 @@ const updateRefreshToken = (tk)=>{
     data.refreshToken = tk;
 }
 
-const handlePostComment = (evt,postId,update,oldPosts) =>{
-
-     const inpValue = evt.target.parentElement.previousSibling.children[1].children[0].value;
-     evt.target.parentElement.previousSibling.children[1].children[0].value = '';
+const handlePostComment = (evt,postId,update,oldPosts,commentsData,resetData,beforeData) =>{
 
      const {token} = getStoredTokens();
-     console.log("inpValue:",inpValue);
-    // if(token)
-    // {
-    //   axios({
-    //     url:ADD_COMMENT(postId),
-    //     method:'put',
-    //     headers:{
-    //       'Authorization':`Bearer ${token}`
-    //     },
-    //     data:{
-    //       comment:inpValue
-    //     }
-    //   }).then(resp=>{
-    //       if(resp.status == 200)
-    //       {
-    //              const newPost = oldPosts.data.map((post)=>{
-    //                 if(post._id == postId)
-    //                 {
-    //                   post.comments.unshift({
-    //                     userId:user._id,
-    //                     comment:inpValue,
-    //                     userPhoto:user.profilePicture,
-    //                     username:user.username,
-    //                   })
-    //
-    //                 }
-    //               return post;
-    //              });
-    //              update({...oldPosts,data:newPost});
-    //       }
-    //       else{
-    //         alert("Error while uploading post!")
-    //       }
-    //   }).catch(err=>{
-    //     console.log(err);
-    //     alert("Error while uploading post!")
-    //   })
-    //
-    // } else if (isTokenExpired(token)){
-    //   refreshTokenFunc();
-    // }
+     const newData = {};
+     newData[postId] = '';
+     resetData({...beforeData,...newData});
+    if(token)
+    {
+      axios({
+        url:ADD_COMMENT(postId),
+        method:'put',
+        headers:{
+          'Authorization':`Bearer ${token}`
+        },
+        data:{
+          comment:commentsData
+        }
+      }).then(resp=>{
+          if(resp.status == 200)
+          {
+                 const newPost = oldPosts.data.map((post)=>{
+                    if(post._id == postId)
+                    {
+                      post.comments.unshift({
+                        userId:user._id,
+                        comment:commentsData,
+                        userPhoto:user.profilePicture,
+                        username:user.username,
+                      })
+
+                    }
+                  return post;
+                 });
+                 update({...oldPosts,data:newPost});
+          }
+          else{
+            alert("Error while uploading post!")
+          }
+      }).catch(err=>{
+        console.log(err);
+        alert("Error while uploading post!")
+      })
+
+    } else if (isTokenExpired(token)){
+      refreshTokenFunc();
+    }
   }
 
   const data = {

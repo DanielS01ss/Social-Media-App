@@ -177,7 +177,6 @@ const fetchUser = (id,token)=>{
       if(resp.status == 200)
       {
         const isFollowed = resp.data.followers.find(us=>us.username == ContextAppData.user.username)!=undefined;
-        console.log("isFollowed:",isFollowed);
         setIsUserFollowed(isFollowed);
         setFetchedUser(resp.data);
         fetchPosts(id);
@@ -202,7 +201,7 @@ const handleFollowUser = ()=>{
         'Authorization':`Bearer ${token}`
       }
     }).then(resp=>{
-      console.log(resp);
+
     }).catch(err=>{
       console.log(err);
     })
@@ -218,7 +217,7 @@ const handleUnfollowUser = ()=>{
        'Authorization':`Bearer ${token}`
      }
    }).then(resp=>{
-     console.log(resp);
+
    }).catch(err=>{
      console.log(err);
    })
@@ -334,6 +333,7 @@ useEffect(()=>{
                  </div>
              </div>
              {/*Posts*/}
+             {console.log("post are :",fetchedUserPosts)}
              {fetchedUserPosts.data ?
              fetchedUserPosts.data.map((post)=>{
                return(
@@ -367,7 +367,8 @@ useEffect(()=>{
                                value = {commentsContent[post._id]}
                                onChange = {(evt)=>{handleChangeCommInpVal(evt,post._id)}}
                                 />
-                              <Button variant="contained" onClick={(evt)=>{ContextAppData.handlePostComment(evt,post._id,setFetchedUserPosts,fetchedUserPosts)}} className="btn btn-post" color="primary">
+
+                              <Button variant="contained" onClick={(evt)=>{const passData = commentsContent[post._id]; ContextAppData.handlePostComment(evt,post._id,setFetchedUserPosts,fetchedUserPosts,passData,setCommentsContent,commentsContent)}} className="btn btn-post" color="primary">
                                   Post
                                 </Button>
                                 <div className="previous-comments">

@@ -28,7 +28,7 @@ import Loading from '../Components/Loading.js';
 import {getStoredTokens} from "../utility-functions/utility-functions";
 import axios from "axios";
 import Loader from "../images/loader.gif";
-import {POST,LIKE_POST} from "../Endpoints/API_ENDPOINTS";
+import {POST,LIKE_POST,ADD_COMMENT} from "../Endpoints/API_ENDPOINTS";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -44,6 +44,8 @@ const MainPage =()=>{
 
 const ContextApp = useContext(AppContext);
 const classes = useStyles();
+const [commentsContent,setCommentsContent] = useState({});
+const [commentDisplay,setCommentDisplay] = useState({});
 const [value, setValue] = React.useState('Controlled');
 const [toggleComments, setToggleComments] = useState(false);
 const [liked,setLiked] = useState(false);
@@ -58,7 +60,6 @@ const [postIsUploading,setPostIsUploading] = useState(false);
 const [postError,setPostError] = useState(false);
 const [posts,setPosts] = useState([]);
 const [postLiked,setPostLiked] = useState({});
-const [commentDisplay,setCommentDisplay] = useState({});
 
 const handleChange = (event) => {
  setValue(event.target.value);
@@ -68,9 +69,12 @@ const resFunc = ()=>{
 
 }
 
-const handleToggleComm = ()=>{
-  setToggleComments(!toggleComments);
+const handleToggleComm = (psId)=>{
+    const data = {}
+    data[psId] = !commentDisplay[psId];
+    setCommentDisplay({...commentDisplay,...data});
 }
+
 
 
 const imgUploadProcess = (evt)=>{
@@ -119,8 +123,7 @@ const postData = ()=>{
     if(resp.status == 200)
     {
       setPostIsUploading(false);
-      ///seteaza un parametru de _id care sa fie id-ul postarii
-      ///primit din backend!!
+
       console.log(resp);
       let postObj = {
         comments:[],
@@ -136,14 +139,6 @@ const postData = ()=>{
       setImageToUpload("");
       setPostText("");
 
-      // for(const post of ContextApp.feedPosts)
-      // {
-      //    const likedPost = !(post.likes.find((ps)=>ps.userId == ContextApp.user._id) == undefined);
-      //    const psId = post._id;
-      //    data[psId] = likedPost;
-      //
-      // }
-       // setPostLiked({...postLiked,...data});
       const data = {}
       data[resp.data] = false;
      setPostLiked({...postLiked,...data})
@@ -156,10 +151,9 @@ const postData = ()=>{
   }).catch(err=>{
     if( err.response && err.response.status == 401)
     {
-      // ContextApp.setIsLoading(true);
       ContextApp.setLoggedIn(false);
-
     }
+
     setPostIsUploading(false);
     alert("Error while posting!");
   })
@@ -245,6 +239,63 @@ const handleLike = (postId)=>{
 const [isLoadingData,setIsLoadingData] = useState(true);
 let user;
 
+const handleChangeCommentText = (evt,psId)=>{
+   const data = evt.target.value;
+   const newCommentData = {};
+   newCommentData[psId] = data;
+   setCommentsContent({...commentsContent,...newCommentData});
+}
+
+const handlePostCommentData = (evt,postId)=>{
+   const newPosts = posts;
+   const commentObj = {
+     userId:  ContextApp.user._id,
+     comment : commentsContent[postId],
+     userPhoto: ContextApp.user.profilePicture,
+     username:ContextApp.user.username
+   };
+   const newCommentData = {};
+   const commToPost = commentsContent[postId];
+   newCommentData[postId] = '';
+   setCommentsContent({...commentsContent,...newCommentData});
+
+   const {token} = getStoredTokens();
+
+    if(token){
+      axios({
+        method:'put',
+        url:ADD_COMMENT(postId),
+        headers:{
+          'Authorization':`Bearer ${token}`
+        },
+        data:{
+          comment:commToPost
+        }
+      }).then(resp=>{
+        console.log(resp);
+        if(resp.status == 200)
+        {
+          for (const post of newPosts){
+             if(post._id == postId)
+             {
+               post.comments.unshift(commentObj)
+             }
+          }
+
+          setPosts([...newPosts]);
+        }
+      }).catch(err=>{
+        console.log(err);
+      })
+
+    } else {
+      AppContext.setLoggedIn(false);
+    }
+
+
+
+
+}
 
 useEffect(()=>{
     console.log("MainPage first useEffect is called at refresh!");
@@ -270,14 +321,16 @@ useEffect(()=>{
 useEffect(()=>{
     setPosts(ContextApp.feedPosts);
     const data = {};
+    const myCommentData = {};
     for(const post of ContextApp.feedPosts)
     {
        const likedPost = !(post.likes.find((ps)=>ps.userId == ContextApp.user._id) == undefined);
        const psId = post._id;
        data[psId] = likedPost;
-
+       myCommentData[psId] = '';
     }
      setPostLiked({...postLiked,...data});
+     setCommentsContent({...commentsContent,...myCommentData});
 
 },[ContextApp.feedPosts])
 
@@ -361,10 +414,10 @@ if(ContextApp.user)
           </div>
            <div className="post-feedback-section">
              <div><FontAwesomeIcon icon={faThumbsUp} style={{cursor:'pointer'}} onClick={()=>{handleLike(post._id)}} className={postLiked[post._id]?"icon-container like post-elem-clicked":"icon-container"}/><span style={{marginLeft:'20px'}}>{post.likes.length}</span></div>
-             <FontAwesomeIcon icon={faComment} style={{cursor:'pointer'}} onClick={handleToggleComm} className={toggleComments?"icon-container like post-elem-clicked":"icon-container"}/>
+             <FontAwesomeIcon icon={faComment} style={{cursor:'pointer'}} onClick={()=>{handleToggleComm(post._id)}}  className={commentDisplay[post._id]?"icon-container like post-elem-clicked":"icon-container"}/>
            </div>
 
-           <div className={toggleComments? "post-comment-section" : "post-comment-section not-display"}>
+           <div className={commentDisplay[post._id]? "post-comment-section" : "post-comment-section not-display"}>
 
               <TextField
               id="outlined-multiline-static"
@@ -372,9 +425,11 @@ if(ContextApp.user)
               multiline
               style={{width:"80%"}}
               rows={2}
+              value = {commentsContent[post._id]}
+              onChange = {(evt)=>{handleChangeCommentText(evt,post._id)}}
               defaultValue=""
                />
-               <Button variant="contained" className="btn btn-post" color="primary">
+             <Button variant="contained" onClick={(evt)=>{handlePostCommentData(evt,post._id)}} className="btn btn-post" color="primary">
                  Post
                </Button>
                <div className="previous-comments">
@@ -390,9 +445,7 @@ if(ContextApp.user)
                        </div>
                    )
                  })}
-
                </div>
-
            </div>
           </div>
        </div>
