@@ -16,11 +16,12 @@ import Messages from "./Components/Messages.js";
 import Questions from "./Components/Questions.js";
 import Settings from "./Components/Settings.js";
 import Success from "./Components/Success.js";
+import Search from "./Components/Search.js";
 import {AppContext} from "./Context/AppContext";
 import React , {useContext,useEffect, useState} from "react";
 import { Redirect } from "react-router-dom";
 import axios from "axios";
-import {CHECK_TOKEN_URL,GET_USER_URL,REFRESH_TOKEN_URL,ADD_COMMENT,FEED_POSTS} from "./Endpoints/API_ENDPOINTS";
+import {CHECK_TOKEN_URL,GET_USER_URL,REFRESH_TOKEN_URL,ADD_COMMENT,FEED_POSTS,SEARCH_USER} from "./Endpoints/API_ENDPOINTS";
 import { useHistory } from "react-router-dom";
 import {useSetLoggedInTrue} from "./utility-functions/useSetLogin";
 import jwt_decode from "jwt-decode";
@@ -40,6 +41,18 @@ const UserRoutePages = ()=>{
    </Switch>
   )
 }
+
+const SearchRoute = (params)=>{
+
+  return(
+    <>
+      <FeedNavbar/>
+      <Search data={params.location}/>
+    </>
+  )
+
+}
+
 
 const AuthenticatedRoute = (props)=>{
 
@@ -376,6 +389,7 @@ useEffect(()=>{
        </Route>
        <Route path='/about' component={About}>
        </Route>
+       <Route path='/search' component={SearchRoute}/>
        <Route component={PageNotFound}/>
        </Switch>
        </AppContext.Provider>
@@ -383,7 +397,7 @@ useEffect(()=>{
      </div>
    )
  }
-
+ 
 }
 
 export default App;

@@ -257,7 +257,21 @@ const [profileImg,setProfileImg] = useState("");
   const [renderNotifications, setRenderNotifications] = useState(false);
   const [renderMessages,setRenderMessages] = useState(false);
   const [renderHomeBtn,setRenderHomeBtn] = useState(false);
+  const [searchInputData,setSearchInputData] = useState('');
 
+  const handleChangeText = (evt)=>{
+    const txt = evt.target.value;
+    setSearchInputData(txt);
+  }
+
+
+ const handleSubmitValue = (evt)=>{
+   if(evt.code == "Enter")
+    {
+        history.push(`/search?q=${searchInputData}`);
+    }
+
+ }
 
   useEffect(()=>{
 
@@ -322,6 +336,9 @@ if(AppContextData.user){
                input: classes.inputInput,
              }}
              inputProps={{ 'aria-label': 'search' }}
+             value = {searchInputData}
+             onChange = {handleChangeText}
+             onKeyPress = {handleSubmitValue}
            />
          </div>
 

@@ -291,10 +291,6 @@ const handlePostCommentData = (evt,postId)=>{
     } else {
       AppContext.setLoggedIn(false);
     }
-
-
-
-
 }
 
 useEffect(()=>{
