@@ -60,7 +60,7 @@ const handleSend = ()=>{
     };
     const oldMessages = [...props.messages];
     oldMessages.push(msgData);
-    
+    console.log("I am here!");
     props.divRef.current.scrollIntoView({ behavior: 'smooth' });
     props.setMessages(oldMessages);
   }
