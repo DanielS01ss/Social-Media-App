@@ -344,12 +344,7 @@ if(ContextApp.user)
           <Link to="/user/messages" style={{textDecoration:"none",fontSize:"1.3rem", color:"#000"}}>Chats</Link>
          </span>
      </div>
-    <div className="item-container item-large">
-      <FontAwesomeIcon icon={faQuestionCircle} className="icon-container"/>
-      <span className="inline">
-        <Link to="/user/questions" style={{textDecoration:"none",fontSize:"1.3rem", color:"#000"}}>Questions</Link>
-      </span>
-    </div>
+  
   </div>
   <div className="main-content">
   <div className="post-card">
