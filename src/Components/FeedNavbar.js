@@ -426,12 +426,7 @@ if(AppContextData.user){
 
 
 
-       <div style={{marginRight:"40px"}} className="item-container item-large">
-         <Link to='/user/questions' style={{textDecoration:"none"}}>
-           <FontAwesomeIcon icon={faQuestionCircle} className="icon-container-ham-menu large-font"/>
-           <span className="inline-ham-menu large-font">Questions</span>
-         </Link>
-       </div>
+      
      </div>
    </div>
  ) }

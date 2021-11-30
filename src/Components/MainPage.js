@@ -344,7 +344,7 @@ if(ContextApp.user)
           <Link to="/user/messages" style={{textDecoration:"none",fontSize:"1.3rem", color:"#000"}}>Chats</Link>
          </span>
      </div>
-  
+
   </div>
   <div className="main-content">
   <div className="post-card">
@@ -450,10 +450,7 @@ if(ContextApp.user)
 
   </div>
   <div className="right-nav">
-      <div className="birthday-container">
-        <img src={Birthday} className="birthday-img"/>
-        <span><strong>Costica</strong> and 5 others celebrate their birtday!</span>
-      </div>
+
       <img src={Add} alt="add" className="addImg" />
       <div className="friend-list">
         <ul>
