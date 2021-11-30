@@ -25,7 +25,7 @@ import {AppContext} from "../Context/AppContext";
 import Loading from '../Components/Loading.js';
 import {getStoredTokens} from "../utility-functions/utility-functions.js";
 import jwt_decode from "jwt-decode";
-import {FETCH_USER_URL,LIKE_POST,FOLLOW_USER,UNFOLLOW_USER} from "../Endpoints/API_ENDPOINTS";
+import {FETCH_USER_URL,LIKE_POST,FOLLOW_USER,UNFOLLOW_USER,CREATE_CONVERSATION,SEARCH_USER} from "../Endpoints/API_ENDPOINTS";
 import axios from "axios";
 import {useHistory} from "react-router-dom";
 import {clearCookies} from "../utility-functions/utility-functions";
@@ -118,8 +118,7 @@ const handleLike = (postId)=>{
     })(stateValue);
 
 
-   }
-
+}
 
 const fetchPosts = (id)=>{
     const {token} = getStoredTokens();
@@ -230,6 +229,65 @@ const handleChangeCommInpVal = (evt,postId)=>{
 
 }
 
+const createConversation = ()=>{
+
+  history.push()
+  const {token} = getStoredTokens();
+
+
+  const foundPers = ContextAppData.user.conversationsParteners.find(usr=> usr.id == fetchedUser._id);
+  console.log(foundPers);
+  if(!foundPers || ContextAppData.user.conversationsParteners.length == 0)
+  {
+
+    axios({
+      method:'post',
+      url:CREATE_CONVERSATION,
+      headers:{
+        'Authorization':`Bearer ${token}`
+      },
+      data:{
+        userId:fetchedUser._id
+      }
+    }).then(resp=>{
+
+      history.push('/user/messages');
+      window.location.reload();
+
+    }).catch(err=>{
+        history.push('/user/messages');
+        alert("Error while creating conversation");
+      console.log(err);
+    })
+
+  }
+  else{
+     history.push('/user/messages');
+  }
+
+
+
+  fetch('http://localhost:8000/api/message/create_conversation',{
+    method:'post',
+    headers:{
+      'Authorization':`Bearer ${token}`
+    },
+    body:JSON.stringify({
+      userId:'6163fbc60a32462f4c5ed9ce'
+    })
+  }).then(resp=>{
+    console.log('The request was made!!!')
+    console.log(resp);
+  }).catch(err=>{
+    console.log(err);
+  })
+
+}
+
+const handleStartConv = (personId)=>{
+  console.log(personId);
+
+}
 
 useEffect(()=>{
 
@@ -257,10 +315,12 @@ useEffect(()=>{
       clearCookies()
     }
   }
-},[location])
+},[location]);
 
 
-  if(!_.isEmpty(fetchedUser))
+
+
+if(!_.isEmpty(fetchedUser))
   {
       if(fetchedUser.fetched)
         return (
@@ -294,9 +354,9 @@ useEffect(()=>{
                 </div>
                 }
                   </p>
-                  <p className="user-contact-action">
+                  <p className="user-contact-action"  onClick={handleStartConv(fetchedUser._id)}>
                   <FontAwesomeIcon icon = {faCommentAlt} className = "user-action-icon"/>
-                  <span className="user-action-icon-label"><Link style={{textDecoration:"none",fontSize:"1.3rem"}} to="/user/messages">Message</Link></span>
+                  <span className="user-action-icon-label" onClick={()=>{createConversation()}} className="link-decoration">&nbsp; Messages</span>
                   </p>
                 </div>
             }

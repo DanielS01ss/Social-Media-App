@@ -633,21 +633,6 @@ const handleDeleteUser = ()=>{
         </div>
 
 
-        {!confirmDelete && <Button variant="contained" className="btn" style={{marginBottom:"20px",paddingLeft:"30px",width:'60%'}} onClick={()=>{setConfirmDelete(true)}} color="secondary">
-          DELETE ACCOUNT
-        </Button>}
-     {confirmDelete &&
-       <div className="confirm-delete-container">
-         <h1>Are you sure you want to delete your account?</h1>
-       <Button variant="contained" className="btn" style={{marginBottom:"20px"}} onClick={()=>{setConfirmDelete(false)}} color="secondary">
-         Yes
-       </Button>
-       <Button variant="contained" className="btn" style={{marginBottom:"20px",marginLeft:"30px"}} onClick={()=>{setConfirmDelete(false)}} color="primary">
-         No
-       </Button>
-       </div>
-     }
-
 
      </div>
    )

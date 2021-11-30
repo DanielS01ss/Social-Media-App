@@ -26,6 +26,7 @@ import { useHistory } from "react-router-dom";
 import {useSetLoggedInTrue} from "./utility-functions/useSetLogin";
 import jwt_decode from "jwt-decode";
 import {clearCookies,isTokenExpired,getStoredTokens,setCookie,shuffle} from "./utility-functions/utility-functions.js";
+import {io} from 'socket.io-client';
 
 const _ = require("lodash");
 
@@ -50,7 +51,6 @@ const SearchRoute = (params)=>{
       <Search data={params.location}/>
     </>
   )
-
 }
 
 
@@ -397,7 +397,26 @@ useEffect(()=>{
      </div>
    )
  }
- 
+
+ // useEffect(()=>{
+ //   const socket = io('http://localhost:8080/');
+ //
+ //   ///functiile ar merge puse aici pentru ca este bine sa accesezi toate acestea dupa ce s-a conectat la server!!
+ //
+ //   socket.on('connect',()=>{
+ //     console.log(`You connected with id:${socket.id}`);
+ //     socket.emit('send-message',{messageData:'Ba gigele ada painea incoace!!'});
+ //   });
+ //
+ //   ///functia aceasta trimite un event catre server!!
+ //   ///pe server trebuie sa asculti dupa custom event si cand apare sa executi ce vrei tu sa executi pentru eventul
+ //   ///respectiv
+ //   socket.emit('custom-event',10,20);
+ //   socket.on('receive-message',message=>{
+ //     console.log('Uite ba ce am primit de la server:',me ssage);
+ //   })
+ // })
+
 }
 
 export default App;
