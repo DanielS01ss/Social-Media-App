@@ -30,6 +30,7 @@
   width: 50px;
   height: 50px;
   border-radius: 50%;
+  margin-bottom: 10px;
 }
 .msg-header{
   margin-bottom: 10px;
@@ -172,6 +173,85 @@
   -webkit-box-shadow: 0px 0px 15px 3px #3BC0FF;
   box-shadow: 0px 0px 15px 3px #3BC0FF;
   position: fixed;
+  z-index: 20000;
+}
+
+.compose-new-message{
+  z-index:300000;
+  bottom: 10px;
+  left:5px;
+  position: absolute;
+  width: 39px;
+  height: 39px;
+  border-radius: 50%;
+  background-color: #00328f;
+  -webkit-box-shadow: 0px 0px 12px 1px #15E6FF;
+box-shadow: 0px 0px 12px 1px #15E6FF;
+}
+
+.compose-new-message:hover{
+  cursor: pointer;
+  -webkit-box-shadow: 0px 0px 12px 8px #15E6FF;
+box-shadow: 0px 0px 12px 8px #15E6FF;
+}
+
+.edit-icon{
+  color:#fff;
+  text-align: center;
+  margin-left: 30%;
+  margin-top:25%;
+}
+
+.new-message-popup{
+    z-index: 300000;
+    position: absolute;
+    border-radius: 10px;
+    bottom: 1px;
+    left:80px;
+    width: 320px;
+    height: 320px;
+    background-color: #fff;
+    -webkit-box-shadow: 0px 0px 5px 2px #686868;
+box-shadow: 0px 0px 5px 2px #686868;
+}
+
+.toggle-conv-container-btn{
+  margin-top: 20px;
+  display:flex;
+  width: 100%;
+}
+
+.new-message-box-popup-title{
+  margin-top:10px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  text-align: center;
+  border-bottom: 1px solid #a3a3a3;
+}
+
+.new-message-popup-close{
+  margin-top:15px;
+ margin-left: 15px;
+}
+
+.disabled-send{
+  color:#D7E5F0;
+}
+
+.disabled-send:hover{
+  color:#D7E5F0;
+}
+
+.search-msg-person-input{
+    background-color: #fff;
+    margin-top:10px !important;
+    margin-left:35px !important;
+    width: 70%;
+}
+
+.conversation-selected{
+   background-color: #f9c5d1;
+   background-image: linear-gradient(315deg, #f9c5d1 0%, #9795ef 74%);;
 }
 
 
@@ -195,6 +275,7 @@
       margin-left: 25px;
   }
 }
+
 
 @media only screen and (max-width:600px){
   .box3{

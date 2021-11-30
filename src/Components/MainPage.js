@@ -28,7 +28,7 @@ import Loading from '../Components/Loading.js';
 import {getStoredTokens} from "../utility-functions/utility-functions";
 import axios from "axios";
 import Loader from "../images/loader.gif";
-import {POST,LIKE_POST,ADD_COMMENT} from "../Endpoints/API_ENDPOINTS";
+import {POST,LIKE_POST,ADD_COMMENT,CREATE_CONVERSATION} from "../Endpoints/API_ENDPOINTS";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -293,6 +293,8 @@ const handlePostCommentData = (evt,postId)=>{
     }
 }
 
+
+
 useEffect(()=>{
     console.log("MainPage first useEffect is called at refresh!");
     window.addEventListener('resize',resFunc);
@@ -336,11 +338,11 @@ if(ContextApp.user)
     return(
       <div className="main-container">
       <div className="side-nav options">
-     <div className="item-container item-large">
+     <div className="item-container item-large special-align">
        <FontAwesomeIcon icon={faCommentDots} className="icon-container"/>
-       <span className="inline">
-        <Link to="/user/messages" style={{textDecoration:"none",fontSize:"1.3rem", color:"#000"}}>Chats</Link>
-       </span>
+         <span className="inline">
+          <Link to="/user/messages" style={{textDecoration:"none",fontSize:"1.3rem", color:"#000"}}>Chats</Link>
+         </span>
      </div>
     <div className="item-container item-large">
       <FontAwesomeIcon icon={faQuestionCircle} className="icon-container"/>

@@ -417,17 +417,21 @@ if(AppContextData.user){
         <FontAwesomeIcon icon={faTimes} className="close-btn" onClick={toggleDrawer}/>
 
 
-        <div className="item-container item-large">
-          <FontAwesomeIcon icon={faCommentDots} className="icon-container-ham-menu"/>
-          < span className="inline-ham-menu">Chats</span>
+        <div style={{marginRight:"70px"}} className="item-container item-large">
+          <Link to='/user/messages' style={{textDecoration:"none"}}>
+            <FontAwesomeIcon icon={faCommentDots}  style={{marginRight:15}} className="icon-container-ham-menu large-font"/>
+            <span className="inline-ham-menu large-font">Chats</span>
+          </Link>
         </div>
 
 
-       <div className="item-container item-large">
-         <FontAwesomeIcon icon={faQuestionCircle} className="icon-container-ham-menu"/>
-         <span className="inline-ham-menu">Questions</span>
-       </div>
 
+       <div style={{marginRight:"40px"}} className="item-container item-large">
+         <Link to='/user/questions' style={{textDecoration:"none"}}>
+           <FontAwesomeIcon icon={faQuestionCircle} className="icon-container-ham-menu large-font"/>
+           <span className="inline-ham-menu large-font">Questions</span>
+         </Link>
+       </div>
      </div>
    </div>
  ) }

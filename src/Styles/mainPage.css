@@ -3,8 +3,9 @@
   display: flex;
   flex-direction: row;
   margin-top: 30px;
-  justify-content: end;
+  justify-content: center;
   text-align: left;
+  margin-right: 20px;
 }
 
 .inline{
@@ -21,7 +22,6 @@
   margin-left: 3%;
   height: 85%;
   position: fixed;
-  /* margin-left: 20px; */
   width: 15%;
   overflow-y: scroll;
 }
@@ -42,13 +42,15 @@
   -webkit-box-shadow: 1px 2px 27px 5px rgba(0,0,0,0.36);
   box-shadow: 1px 2px 27px 5px rgba(0,0,0,0.36);
 }
-/* .person-avatar{
-  border-radius: 50%;
-  display: inline;
-   width: 100px;
-  height: 90px;
-  padding-top: 20px;
-}  */
+
+.special-align{
+  margin-right: 60px;
+}
+
+.link-decoration:hover{
+    cursor: pointer;
+}
+
 .person-avatar{
   display: inline;
   width: 80px;

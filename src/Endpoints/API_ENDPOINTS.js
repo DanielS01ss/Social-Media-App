@@ -13,5 +13,8 @@ const FOLLOW_USER = (id)=>`http://localhost:8000/api/user/${id}/follow`;
 const UNFOLLOW_USER = (id)=>`http://localhost:8000/api/user/${id}/unfollow`;
 const FEED_POSTS = `http://localhost:8000/api/posts/time/all`;
 const SEARCH_USER = `http://localhost:8000/api/user/search_user`;
+const CREATE_CONVERSATION = `http://localhost:8000/api/message/create_conversation`
+const SOCKET_URL = "http://localhost:8080";
+const GET_MESSAGES = "http://localhost:8000/api/message/messages-conv";
 
-export {LOGIN_URL,SIGNUP_URL,DELETE_TOKEN_URL,CHECK_TOKEN_URL,GET_USER_URL,UPDATE_USER,REFRESH_TOKEN_URL,FETCH_USER_URL,POST,ADD_COMMENT,LIKE_POST,FOLLOW_USER,UNFOLLOW_USER,FEED_POSTS,SEARCH_USER};
+export {LOGIN_URL,SIGNUP_URL,DELETE_TOKEN_URL,CHECK_TOKEN_URL,GET_USER_URL,UPDATE_USER,REFRESH_TOKEN_URL,FETCH_USER_URL,POST,ADD_COMMENT,LIKE_POST,FOLLOW_USER,UNFOLLOW_USER,FEED_POSTS,SEARCH_USER,CREATE_CONVERSATION,SOCKET_URL,GET_MESSAGES};
