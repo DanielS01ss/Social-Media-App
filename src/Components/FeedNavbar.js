@@ -39,7 +39,7 @@ import Person from "../images/person.jpg";
 import Birthday from '../images/gift-box.png';
 import {Link} from "react-router-dom";
 import axios from "axios";
-import {DELETE_TOKEN_URL} from "../Endpoints/API_ENDPOINTS.js";
+import {DELETE_TOKEN_URL,GET_NOTIFICATIONS,GET_MESSAGE_NOTIFICATIONS,DELETE_MESSAGE_NOTIFICATIONS,DELETE_NOTIFICATIONS} from "../Endpoints/API_ENDPOINTS.js";
 import {AppContext} from "../Context/AppContext";
 import {useHistory} from "react-router-dom";
 import {clearCookies,getStoredTokens} from "../utility-functions/utility-functions.js";
@@ -123,6 +123,7 @@ export default function PrimarySearchAppBar() {
 
  };
 
+
  const handleMobileMenuClose = () => {
    setMobileMoreAnchorEl(null);
  };
@@ -199,6 +200,9 @@ export default function PrimarySearchAppBar() {
    </Menu>
  );
 
+ const [messagesNotifications,setMessageNotifications] = useState([]);
+ const [notifications,setNotifications] = useState([]);
+
 const [profileImg,setProfileImg] = useState("");
  const mobileMenuId = 'primary-search-account-menu-mobile';
  const renderMobileMenu = (
@@ -212,16 +216,16 @@ const [profileImg,setProfileImg] = useState("");
      onClose={handleMobileMenuClose}
    >
      <MenuItem onClick={handleMessagesMenu}>
-       <IconButton aria-label="show 4 new mails" color="inherit">
-         <Badge badgeContent={4} color="secondary">
+       <IconButton aria-label={`show ${messagesNotifications.length} new mails`} color="inherit">
+         <Badge badgeContent={messagesNotifications.length} color="secondary">
            <MailIcon />
          </Badge>
        </IconButton>
        <p>Messages</p>
      </MenuItem>
      <MenuItem onClick={handleNotificationsMenu}>
-       <IconButton aria-label="show 11 new notifications"  color="inherit">
-         <Badge badgeContent={11} color="secondary">
+       <IconButton aria-label={`show ${notifications.length} new notifications`}  color="inherit">
+         <Badge badgeContent={notifications.length} color="secondary">
            <NotificationsIcon />
          </Badge>
        </IconButton>
@@ -252,7 +256,6 @@ const [profileImg,setProfileImg] = useState("");
   }
 
   const [isLoading,setIsLoading] = useState(true);
-  const notifications = [];
   const [renderHamMenu,setRenderHamMenu] = useState(true);
   const [renderNotifications, setRenderNotifications] = useState(false);
   const [renderMessages,setRenderMessages] = useState(false);
@@ -273,10 +276,76 @@ const [profileImg,setProfileImg] = useState("");
 
  }
 
+
+const deleteAllNotifications = ()=>{
+  setNotifications([]);
+  const {token} = getStoredTokens();
+  axios.delete(DELETE_NOTIFICATIONS,{
+    headers:{
+      'Authorization':`Bearer ${token}`
+    }
+  }).then(resp=>{
+    console.log(resp);
+  }).catch(err=>{
+    console.log(err);
+  })
+
+}
+
+ const fetchNotifications = ()=>{
+
+   const {token} = getStoredTokens();
+   axios.get(GET_MESSAGE_NOTIFICATIONS,{
+    headers:{
+      Authorization:`Bearer ${token}`,
+    }
+  }).then(resp=>{
+    setMessageNotifications(resp.data);
+  }).catch(err=>{
+      console.log("Error while fetching notifications");
+  })
+
+  axios.get(GET_NOTIFICATIONS,{
+    headers:{
+      Authorization:`Bearer ${token}`
+    }
+  }).then(resp=>{
+    setNotifications(resp.data);
+  }).catch(err=>{
+    console.log(err);
+  });
+
+ }
+
+ const deleteMessageNotification =()=>{
+
+   const {token} = getStoredTokens();
+    setMessageNotifications([]);
+    handleMessagesMenu();
+
+   axios.delete(DELETE_MESSAGE_NOTIFICATIONS,{
+     headers:{
+       Authorization:`Bearer ${token}`
+     }
+   }).then(resp=>{
+     console.log(resp);
+   }).catch(err=>{
+     console.log(err);
+   })
+
+ }
+
+
   useEffect(()=>{
      const localSocket = AppContextData.globalSocket;
 
-     localSocket.on()
+     ///vom face un request catre un api endpoint de unde trage notificarile
+     fetchNotifications();
+
+     localSocket.on('messagenotification',(notificationObj)=>{
+        setMessageNotifications([...messagesNotifications,notificationObj])
+     });
+
 
     window.addEventListener("resize",handleDrawerAtResize);
     if(window.location.pathname == "/user/profile")
@@ -352,13 +421,13 @@ if(AppContextData.user){
 
          <div className={classes.grow} />
          <div className={classes.sectionDesktop}>
-           <IconButton aria-label="show 4 new mails" color="inherit" onClick={handleMessagesMenu}>
-             <Badge badgeContent={1} color="secondary">
+           <IconButton aria-label={`show ${messagesNotifications.length} new mails`} color="inherit" onClick={handleMessagesMenu}>
+             <Badge badgeContent={messagesNotifications.length} color="secondary">
                <MailIcon />
              </Badge>
            </IconButton>
-           <IconButton aria-label="show 17 new notifications" onClick={handleNotificationsMenu} color="inherit">
-             <Badge badgeContent={17} color="secondary">
+           <IconButton aria-label={`show ${notifications.length} new notifications`} onClick={handleNotificationsMenu} color="inherit">
+             <Badge badgeContent={notifications.length} color="secondary">
                <NotificationsIcon />
              </Badge>
            </IconButton>
@@ -393,25 +462,79 @@ if(AppContextData.user){
       <div className="navbar-dropdown">
 
        <p className="navbar-dropdown-title">Notitifications</p>
+
         { notifications.length === 0 ? <p className="no-notifications">No new notifications</p> :
-        <div className="notifications-body">
-          <div className="notification-item"><img className="notifications-photo" src={Person}/> <FontAwesomeIcon icon={faThumbsUp} className="notification-icon notification-like"/> <span className="notification-text"> Liked your post</span></div>
-          <div className="notification-item"><img className="notifications-photo" src={Person}/> <FontAwesomeIcon icon={faComments} className="notification-icon notification-comment"/> <span className="notification-text"> Commented at your post</span></div>
-          <div className="notification-item"><img className="notifications-photo" src={Person}/> <FontAwesomeIcon icon={faPlusSquare} className="notification-icon notification-follow"/> <span className="notification-text"> Started to follow you</span></div>
-        </div>
+
+          <div>
+            {console.log(notifications)}
+            {notifications.map(notif=>{
+
+              if(notif.notificationType == 1)
+              {
+                return(
+                    <div className="notifications-body">
+                          <div className="notification-item">
+                            <p className="notif-username">{notif.userActioned.username}</p><img className="notifications-photo" src={`data:image/jpeg;base64,${notif.userActioned.profilePicture}`}/> <FontAwesomeIcon icon={faThumbsUp} className="notification-icon notification-like"/> <span className="notification-text"> Liked your post</span>
+
+                        </div>
+                    </div>
+                )
+              } else if (notif.notificationType == 2)
+              {
+                return(
+                  <div className="notifications-body">
+                        <div className="notification-item"><p className="notif-username">{notif.userActioned.username}</p><img className="notifications-photo" src={`data:image/jpeg;base64,${notif.userActioned.profilePicture}`}/> <FontAwesomeIcon icon={faComments} className="notification-icon notification-comment"/> <span className="notification-text"> Commented at your post</span></div>
+                  </div>
+                )
+              }
+              return(
+                <div className="notifications-body">
+                  <div className="notification-item"><p className="notif-username">{notif.userActioned.username}</p><img className="notifications-photo"  src={`data:image/jpeg;base64,${notif.userActioned.profilePicture}`}/> <FontAwesomeIcon icon={faPlusSquare} className="notification-icon notification-follow"/> <span className="notification-text"> Started to follow you</span></div>
+                </div>
+              )
+            })}
+
+
+
+          </div>
+
         }
-        <div className="notifications-bottom-dialog"><p className="close-dialog-text" onClick={handleNotificationsMenu}>Close notifications</p> {notifications.length>0 && <p className="notifications-delete-text">Delete all notifications <FontAwesomeIcon icon={faTrash} className="notifications-delete-icon"/></p>}</div>
+        <div className="notifications-bottom-dialog"><p className="close-dialog-text" onClick={handleNotificationsMenu}>Close notifications</p> {notifications.length>0 && <p className="notifications-delete-text" onClick={deleteAllNotifications}>Delete all notifications <FontAwesomeIcon icon={faTrash} className="notifications-delete-icon"/></p>}</div>
 
     </div>
     }
 
     {renderMessages &&
       <div className="navbar-dropdown">
-          <p className="navbar-dropdown-title">Messages</p>
-            <FontAwesomeIcon icon ={faUserFriends} className="no-message-icon"/>
-           <p className="no-messages-text">No messages. Go and socialize with friends</p>
-           {/*Aici va fi cu left you a message (x left you a message)*/}
-           <div className="notifications-bottom-dialog"><p className="close-dialog-text" onClick={handleMessagesMenu}>Close notifications</p></div>
+
+        {messagesNotifications.length>0?
+        <div>
+          {messagesNotifications.map((msg,index)=>{
+            console.log(msg);
+            return(
+          <Link to='/user/messages' style={{textDecoration:'none'}} key={index}>
+              <div className="message-notifications-cotainer">
+                    <img src={`data:image/jpeg;base64,${msg.sender.profilePicture}`} className="user-notification-image" alt='user notification image'/>
+                    <p>{msg.sender.username}   left you a message</p>
+              </div>
+            </Link>
+            )
+
+          })}
+          </div>
+          :
+          <div>
+            <p className="navbar-dropdown-title">Messages</p>
+              <FontAwesomeIcon icon ={faUserFriends} className="no-message-icon"/>
+             <p className="no-messages-text">No messages. Go and socialize with friends</p>
+          </div>
+        }
+            <div className="notifications-bottom-dialog">
+
+                 <p className="close-dialog-text" onClick={handleMessagesMenu}>Close notifications</p>
+
+               {messagesNotifications.length>0 && <p className="notifications-delete-text" onClick={deleteMessageNotification}>Delete all notifications <FontAwesomeIcon icon={faTrash} className="notifications-delete-icon"/></p>}
+            </div>
       </div>
     }
 

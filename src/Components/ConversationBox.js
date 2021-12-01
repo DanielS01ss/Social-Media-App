@@ -49,8 +49,12 @@ const handleSend = ()=>{
 
   if(!isEmpty)
   {
-
-    props.sendMsg.emit("send-message",msgToSend,props.convInd,myAppContext.user._id,props.messageRecipient);
+    const senderData = {
+      userId:myAppContext.user._id,
+      username:myAppContext.user.username,
+      profilePicture:myAppContext.user.profilePicture
+    };
+    props.sendMsg.emit("send-message",msgToSend,props.convInd,myAppContext.user._id,props.messageRecipient,senderData);
     setMsgToSend("");
     setIsEmpty(true);
     const msgData = {
@@ -99,6 +103,7 @@ if(!props.isLoading)
       <div ref={props.divRef}>
       </div>
       <form className="msg-form" onSubmit={(el)=>{el.preventDefault()}} noValidate autoComplete="off">
+
           <TextField ref={messageField} value={msgToSend} id="outlined-basic" onChange={handleChange} label="Send a message" variant="outlined" className="msg-input"/>
           <FontAwesomeIcon onClick={handleSend} icon={faPaperPlane} className={isEmpty?"msg-send-btn disabled-send":"msg-send-btn"}/>
       </form>
