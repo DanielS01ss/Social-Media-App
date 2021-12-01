@@ -14,9 +14,9 @@ useEffect(()=>{
 
   return(
       <div className='main'>
-      {/*  <video className="video-tag" autoPlay loop muted>
+        <video className="video-tag" autoPlay loop muted>
           <source src={sample} type="video/mp4"></source>
-        </video> */}
+        </video>
        <div>
       </div>
       <div className="mainText">

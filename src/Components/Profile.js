@@ -25,7 +25,7 @@ import {AppContext} from "../Context/AppContext";
 import Loading from '../Components/Loading.js';
 import {getStoredTokens} from "../utility-functions/utility-functions.js";
 import jwt_decode from "jwt-decode";
-import {FETCH_USER_URL,LIKE_POST,FOLLOW_USER,UNFOLLOW_USER,CREATE_CONVERSATION,SEARCH_USER} from "../Endpoints/API_ENDPOINTS";
+import {FETCH_USER_URL,LIKE_POST,FOLLOW_USER,UNFOLLOW_USER,CREATE_CONVERSATION,SEARCH_USER,POST_NOTIFICATION} from "../Endpoints/API_ENDPOINTS";
 import axios from "axios";
 import {useHistory} from "react-router-dom";
 import {clearCookies} from "../utility-functions/utility-functions";
@@ -68,7 +68,32 @@ const Profile = ({location}) =>{
       setCommentDisplay({...commentDisplay,...data});
   }
 
-const handleLike = (postId)=>{
+///dai emit pe socket sa trimita notificare
+///sau sa o salveze
+
+const handleLike = (postId,index)=>{
+
+  if(!postLiked[postId])
+  {
+    axios({
+      url:POST_NOTIFICATION,
+      method:'post',
+      headers:{
+        'Authorization':`Bearer ${token}`
+      },
+      data:{
+        user:ContextAppData.user,
+        recipientId:fetchedUserPosts.data[index].postHolder._id,
+        img:fetchedUserPosts.data[index].img,
+        notificationType:1
+      }
+    }).then(resp=>{
+      console.log(resp);
+    }).catch(err=>{
+      console.log(err);
+    })
+  }
+
 
     const data = {};
     data[postId] = !postLiked[postId];
@@ -201,6 +226,25 @@ const handleFollowUser = ()=>{
       }
     }).then(resp=>{
 
+    }).catch(err=>{
+      console.log(err);
+    })
+
+
+    axios({
+      url:POST_NOTIFICATION,
+      method:'post',
+      headers:{
+        'Authorization':`Bearer ${token}`
+      },
+      data:{
+        user:ContextAppData.user,
+        recipientId:fetchedUser._id,
+        img:fetchUser.profilePicture,
+        notificationType:3
+      }
+    }).then(resp=>{
+      console.log(resp);
     }).catch(err=>{
       console.log(err);
     })
@@ -395,7 +439,7 @@ if(!_.isEmpty(fetchedUser))
              {/*Posts*/}
              {console.log("post are :",fetchedUserPosts)}
              {fetchedUserPosts.data ?
-             fetchedUserPosts.data.map((post)=>{
+             fetchedUserPosts.data.map((post,id)=>{
                return(
                  <div className="user-posts-container ">
                        <div className={displayUserInteract? "profile-post-container ":" profile-post-container  "}>
@@ -411,7 +455,7 @@ if(!_.isEmpty(fetchedUser))
                             {post.img &&  <img src={`data:image/jpeg;base64,${post.img}`} alt="post-image" className="post-image"/>}
                             </div>
                              <div className="post-feedback-section">
-                                <div><FontAwesomeIcon icon={faThumbsUp} style={{cursor:'pointer'}} onClick={()=>{handleLike(post._id)}} className={postLiked[post._id]?"icon-container like post-elem-clicked":"icon-container"}/><span style={{marginLeft:'20px'}}>{post.likes.length}</span></div>
+                                <div><FontAwesomeIcon icon={faThumbsUp} style={{cursor:'pointer'}} onClick={()=>{handleLike(post._id,id)}} className={postLiked[post._id]?"icon-container like post-elem-clicked":"icon-container"}/><span style={{marginLeft:'20px'}}>{post.likes.length}</span></div>
                                 <FontAwesomeIcon icon={faComment} style={{cursor:'pointer'}} onClick={()=>{handleToggleComm(post._id)}} className={commentDisplay[post._id]?"icon-container like post-elem-clicked":"icon-container"}/>
                              </div>
                             </div>

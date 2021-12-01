@@ -68,9 +68,11 @@
 }
 
 .navbar-dropdown{
+  overflow-y:scroll;
   display: flex;
   flex-direction: column;
   width: 40%;
+  height: 350px;
   background-color: #fff;
   border:1px solid #dedede;
   z-index: 30000;
@@ -86,8 +88,16 @@
 .notification-item{
   position: relative;
   margin-top:5px;
-  display: inline;
+  display: flex;
+  flex-direction: row;
   margin-left:20px;
+  justify-content: space-between;
+
+}
+
+.notif-username{
+  margin-left:30px;
+  margin-top:15px;
 }
 
 .navbar-dropdown-title{
@@ -115,7 +125,10 @@
 }
 
 .notification-text{
+  position: relative;
   font-size: 1.3rem;
+  margin-left: 20px;
+  margin-top: 10px;
 }
 
 .notification-birtday-icon{
@@ -143,6 +156,23 @@
    justify-content: space-around;
 }
 
+/* message notifications*/
+
+.user-notification-image{
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+}
+
+.message-notifications-cotainer{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  padding: 12px;
+  border-bottom: 1px solid #cfcfcf;
+}
+
+
 .close-dialog-text{
   /* margin-top:10px; */
   color:blue;
@@ -156,8 +186,16 @@
   color:red;
 }
 
+.notifications-delete-text:hover{
+  cursor: pointer;
+}
+
 .notifications-delete-icon{
   margin-left:10px;
+}
+
+.notifications-delete-icon:hover{
+  cursor:pointer;
 }
 
 .no-notifications{
@@ -166,7 +204,7 @@
 
 .notifications-body{
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
 }
 
 .no-message-icon{

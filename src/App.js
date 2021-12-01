@@ -335,6 +335,9 @@ const handlePostComment = (evt,postId,update,oldPosts,commentsData,resetData,bef
       refreshTokenFunc();
     }
   }
+ const emitLikeNotif=(user,post)=>{
+    globalSocket.emit('like',user,post);
+  }
 
   const data = {
     user:user,
@@ -359,12 +362,20 @@ const handlePostComment = (evt,postId,update,oldPosts,commentsData,resetData,bef
     feedPosts:feedPosts,
     fetchFeedPosts:fetchFeedPosts,
     setGlobalSocket:setGlobalSocket,
-    globalSocket:globalSocket
+    globalSocket:globalSocket,
+    emitLikeNotif:emitLikeNotif
   }
+
+
 
 useEffect(()=>{
 
     reloadDataAfterRefresh();
+    const {token} = getStoredTokens();
+    const mySocket = io(SOCKET_URL,{
+       "query":token
+     });
+     setGlobalSocket(mySocket);
   },[]);
 
 

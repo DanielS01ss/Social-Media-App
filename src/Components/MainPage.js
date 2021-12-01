@@ -28,7 +28,7 @@ import Loading from '../Components/Loading.js';
 import {getStoredTokens} from "../utility-functions/utility-functions";
 import axios from "axios";
 import Loader from "../images/loader.gif";
-import {POST,LIKE_POST,ADD_COMMENT,CREATE_CONVERSATION} from "../Endpoints/API_ENDPOINTS";
+import {POST,LIKE_POST,ADD_COMMENT,CREATE_CONVERSATION,POST_NOTIFICATION} from "../Endpoints/API_ENDPOINTS";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -106,6 +106,7 @@ const handlePhotoUpload = (evt)=>{
 const postData = ()=>{
   setImageUploaded(false);
   setPostIsUploading(true);
+
   const {token} = getStoredTokens();
   axios({
     url:POST,
@@ -146,6 +147,7 @@ const postData = ()=>{
     else{
       console.log("Hello from else!");
       setPostIsUploading(false);
+
       alert("Error while posting!");
     }
   }).catch(err=>{
@@ -157,6 +159,8 @@ const postData = ()=>{
     setPostIsUploading(false);
     alert("Error while posting!");
   })
+
+
 }
 
 const handlePostText = (evt)=>{
@@ -187,13 +191,39 @@ const getData = ()=>{
   })
 }
 
-const handleLike = (postId)=>{
 
+///dai pe socket sa trimita notificare sau sa o salveze
+
+const handleLike = (postId,index)=>{
+
+    const {token} = getStoredTokens();
     const data = {};
     data[postId] = !postLiked[postId];
      setPostLiked({...postLiked,...data});
 
-    const {token} = getStoredTokens();
+  if(!postLiked[postId])
+  {
+    axios({
+      url:POST_NOTIFICATION,
+      method:'post',
+      headers:{
+        'Authorization':`Bearer ${token}`
+      },
+      data:{
+        user:ContextApp.user,
+        recipientId:posts[index].postHolder._id,
+        img:posts[index].img,
+        notificationType:1
+      }
+    }).then(resp=>{
+      console.log(resp);
+    }).catch(err=>{
+      console.log(err);
+    })
+  }
+
+
+
     const stateValue = !postLiked[postId];
     ((likeVal)=>{
       axios({
@@ -246,7 +276,9 @@ const handleChangeCommentText = (evt,psId)=>{
    setCommentsContent({...commentsContent,...newCommentData});
 }
 
-const handlePostCommentData = (evt,postId)=>{
+const handlePostCommentData = (evt,postId,index)=>{
+
+
    const newPosts = posts;
    const commentObj = {
      userId:  ContextApp.user._id,
@@ -291,6 +323,24 @@ const handlePostCommentData = (evt,postId)=>{
     } else {
       AppContext.setLoggedIn(false);
     }
+    ///here goes request
+    axios({
+      url:POST_NOTIFICATION,
+      method:'post',
+      headers:{
+        'Authorization':`Bearer ${token}`
+      },
+      data:{
+        user:ContextApp.user,
+        recipientId:posts[index].postHolder._id,
+        img:posts[index].img,
+        notificationType:2
+      }
+    }).then(resp=>{
+      console.log(resp);
+    }).catch(err=>{
+      console.log(err);
+    })
 }
 
 
@@ -406,7 +456,7 @@ if(ContextApp.user)
             {post.img &&  <img src={`data:image/jpeg;base64,${post.img}`} alt="post-image" className="post-image"/>}
           </div>
            <div className="post-feedback-section">
-             <div><FontAwesomeIcon icon={faThumbsUp} style={{cursor:'pointer'}} onClick={()=>{handleLike(post._id)}} className={postLiked[post._id]?"icon-container like post-elem-clicked":"icon-container"}/><span style={{marginLeft:'20px'}}>{post.likes.length}</span></div>
+             <div><FontAwesomeIcon icon={faThumbsUp} style={{cursor:'pointer'}} onClick={()=>{handleLike(post._id,id)}} className={postLiked[post._id]?"icon-container like post-elem-clicked":"icon-container"}/><span style={{marginLeft:'20px'}}>{post.likes.length}</span></div>
              <FontAwesomeIcon icon={faComment} style={{cursor:'pointer'}} onClick={()=>{handleToggleComm(post._id)}}  className={commentDisplay[post._id]?"icon-container like post-elem-clicked":"icon-container"}/>
            </div>
 
@@ -422,7 +472,7 @@ if(ContextApp.user)
               onChange = {(evt)=>{handleChangeCommentText(evt,post._id)}}
               defaultValue=""
                />
-             <Button variant="contained" onClick={(evt)=>{handlePostCommentData(evt,post._id)}} className="btn btn-post" color="primary">
+             <Button variant="contained" onClick={(evt)=>{handlePostCommentData(evt,post._id,id)}} className="btn btn-post" color="primary">
                  Post
                </Button>
                <div className="previous-comments">
@@ -447,16 +497,11 @@ if(ContextApp.user)
 
 {/*======================== HERE IS POST END(there is another post below this) ========================*/}
 
-
   </div>
   <div className="right-nav">
 
       <img src={Add} alt="add" className="addImg" />
-      <div className="friend-list">
-        <ul>
-           <li className="person-container"> <img src={Person} className="person-avatar-post"/> <span className="active-dot"></span> <p className="person-username">Person 1</p></li>
-        </ul>
-      </div>
+  
      </div>
    </div>
 

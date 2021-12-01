@@ -52,12 +52,8 @@ const Messages = ()=>{
   }
   useEffect(()=>{
 
-    const {token} = getStoredTokens();
-    const mySocket = io(SOCKET_URL,{
-       "query":token
-     });
+      const mySocket = AppCtx.globalSocket;
 
-     AppCtx.setGlobalSocket(mySocket);
 
     mySocket.on('connect',()=>{
       console.log(`You connected with ${mySocket.id}`);
@@ -75,8 +71,9 @@ const Messages = ()=>{
     setSocket(mySocket);
 
     mySocket.on('sended-message',(mObj)=>{
-    
+      console.log("HELLO FROM MY SOCKET");
       notificationBeep();
+       divRef.current.scrollIntoView({ behavior: 'smooth' });
       if(mObj.conversationId==AppCtx.user.conversations[currentConvIndex])
       {
         setMessages(oldArr=>[...oldArr,mObj]);
@@ -120,6 +117,7 @@ const Messages = ()=>{
     }).then(resp=>{
       setMessages(...[resp.data]);
       setIsLoading(false);
+      divRef.current.scrollIntoView({ behavior: 'smooth' });
     }).catch(err=>{
       setIsLoading(false);
       console.log(err);
