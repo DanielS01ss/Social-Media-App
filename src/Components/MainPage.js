@@ -179,7 +179,7 @@ const handlePostText = (evt)=>{
 const getData = ()=>{
   const {token} = getStoredTokens();
   axios({
-    url:'http://localhost:8000/api/posts/getposts',
+    url:'https://peach-pen-deploy.herokuapp.com/api/posts/getposts',
     method:'post',
     headers:{
       'Authorization':`Bearer ${token}`
@@ -501,7 +501,7 @@ if(ContextApp.user)
   <div className="right-nav">
 
       <img src={Add} alt="add" className="addImg" />
-  
+
      </div>
    </div>
 
