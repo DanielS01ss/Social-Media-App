@@ -163,7 +163,7 @@ const fetchUserPosts = ()=>{
       if(!isTokenExpired(token))
       {
         axios({
-          url:'http://localhost:8000/api/posts/getposts',
+          url:'https://peach-pen-deploy.herokuapp.com/api/posts/getposts',
           method:'post',
           headers:{
             'Authorization':`Bearer ${token}`
