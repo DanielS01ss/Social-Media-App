@@ -21,7 +21,7 @@ import {AppContext} from "./Context/AppContext";
 import React , {useContext,useEffect, useState} from "react";
 import { Redirect } from "react-router-dom";
 import axios from "axios";
-import {CHECK_TOKEN_URL,GET_USER_URL,REFRESH_TOKEN_URL,ADD_COMMENT,FEED_POSTS,SEARCH_USER} from "./Endpoints/API_ENDPOINTS";
+import {CHECK_TOKEN_URL,GET_USER_URL,REFRESH_TOKEN_URL,ADD_COMMENT,FEED_POSTS,SEARCH_USER,SOCKET_URL} from "./Endpoints/API_ENDPOINTS";
 import { useHistory } from "react-router-dom";
 import {useSetLoggedInTrue} from "./utility-functions/useSetLogin";
 import jwt_decode from "jwt-decode";
@@ -80,6 +80,7 @@ const [isLoading, setIsLoading] = useState(true);
 const [userPosts,setUserPosts] = useState([]);
 const [isLoadingPosts,setIsLoadingPosts] = useState(false);
 const [feedPosts,setFeedPosts] = useState([]);
+const [globalSocket,setGlobalSocket] = useState(null);
 
 const  setCookie = (cName, cValue, expDays)=> {
         let date = new Date();
@@ -356,10 +357,13 @@ const handlePostComment = (evt,postId,update,oldPosts,commentsData,resetData,bef
     fetchUserPosts:fetchUserPosts,
     handlePostComment:handlePostComment,
     feedPosts:feedPosts,
-    fetchFeedPosts:fetchFeedPosts
+    fetchFeedPosts:fetchFeedPosts,
+    setGlobalSocket:setGlobalSocket,
+    globalSocket:globalSocket
   }
 
 useEffect(()=>{
+
     reloadDataAfterRefresh();
   },[]);
 
@@ -397,25 +401,6 @@ useEffect(()=>{
      </div>
    )
  }
-
- // useEffect(()=>{
- //   const socket = io('http://localhost:8080/');
- //
- //   ///functiile ar merge puse aici pentru ca este bine sa accesezi toate acestea dupa ce s-a conectat la server!!
- //
- //   socket.on('connect',()=>{
- //     console.log(`You connected with id:${socket.id}`);
- //     socket.emit('send-message',{messageData:'Ba gigele ada painea incoace!!'});
- //   });
- //
- //   ///functia aceasta trimite un event catre server!!
- //   ///pe server trebuie sa asculti dupa custom event si cand apare sa executi ce vrei tu sa executi pentru eventul
- //   ///respectiv
- //   socket.emit('custom-event',10,20);
- //   socket.on('receive-message',message=>{
- //     console.log('Uite ba ce am primit de la server:',me ssage);
- //   })
- // })
 
 }
 

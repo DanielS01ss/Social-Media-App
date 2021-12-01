@@ -51,21 +51,13 @@ const Messages = ()=>{
     setToggled(!toggled);
   }
   useEffect(()=>{
-   const {token} = getStoredTokens();
-   const mySocket = io(SOCKET_URL,{
-      "query":token
-    });
 
-    mySocket.on('sended-message',(mObj)=>{
-      console.log("Hello from sended message!");
-      console.log(mObj.conversationId);
-      notificationBeep();
-      if(mObj.conversationId==cvIndex)
-      {
-        setMessages(oldArr=>[...oldArr,mObj]);
-        divRef.current.scrollIntoView({ behavior: 'smooth' });
-      }
-    })
+    const {token} = getStoredTokens();
+    const mySocket = io(SOCKET_URL,{
+       "query":token
+     });
+
+     AppCtx.setGlobalSocket(mySocket);
 
     mySocket.on('connect',()=>{
       console.log(`You connected with ${mySocket.id}`);
@@ -81,6 +73,19 @@ const Messages = ()=>{
 
 
     setSocket(mySocket);
+
+    mySocket.on('sended-message',(mObj)=>{
+    
+      notificationBeep();
+      if(mObj.conversationId==AppCtx.user.conversations[currentConvIndex])
+      {
+        setMessages(oldArr=>[...oldArr,mObj]);
+        divRef.current.scrollIntoView({ behavior: 'smooth' });
+      }
+    })
+
+
+
     myFunction();
     window.addEventListener("resize",myFunction);
     return ()=>{

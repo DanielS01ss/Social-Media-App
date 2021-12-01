@@ -274,6 +274,9 @@ const [profileImg,setProfileImg] = useState("");
  }
 
   useEffect(()=>{
+     const localSocket = AppContextData.globalSocket;
+
+     localSocket.on()
 
     window.addEventListener("resize",handleDrawerAtResize);
     if(window.location.pathname == "/user/profile")
@@ -367,7 +370,6 @@ if(AppContextData.user){
              onClick={handleProfileMenuOpen}
              color="inherit"
            >
-           {console.log("AppContextData.user.profilePicture:",AppContextData.user)}
            <img src={`data:image/jpeg;base64,${AppContextData.user.profilePicture}`} className="person-icon-nav"/>
            </IconButton>
          </div>
@@ -393,7 +395,6 @@ if(AppContextData.user){
        <p className="navbar-dropdown-title">Notitifications</p>
         { notifications.length === 0 ? <p className="no-notifications">No new notifications</p> :
         <div className="notifications-body">
-          <div className="notification-item"><img className="notifications-photo" src={Person}/> <img src={Birthday} className="notification-birtday-icon"/> <span className="notification-text"> X is celebrating his/her birthday</span></div>
           <div className="notification-item"><img className="notifications-photo" src={Person}/> <FontAwesomeIcon icon={faThumbsUp} className="notification-icon notification-like"/> <span className="notification-text"> Liked your post</span></div>
           <div className="notification-item"><img className="notifications-photo" src={Person}/> <FontAwesomeIcon icon={faComments} className="notification-icon notification-comment"/> <span className="notification-text"> Commented at your post</span></div>
           <div className="notification-item"><img className="notifications-photo" src={Person}/> <FontAwesomeIcon icon={faPlusSquare} className="notification-icon notification-follow"/> <span className="notification-text"> Started to follow you</span></div>
@@ -409,6 +410,7 @@ if(AppContextData.user){
           <p className="navbar-dropdown-title">Messages</p>
             <FontAwesomeIcon icon ={faUserFriends} className="no-message-icon"/>
            <p className="no-messages-text">No messages. Go and socialize with friends</p>
+           {/*Aici va fi cu left you a message (x left you a message)*/}
            <div className="notifications-bottom-dialog"><p className="close-dialog-text" onClick={handleMessagesMenu}>Close notifications</p></div>
       </div>
     }
@@ -424,9 +426,6 @@ if(AppContextData.user){
           </Link>
         </div>
 
-
-
-      
      </div>
    </div>
  ) }
